@@ -1,0 +1,2 @@
+# react-native-classroom
+Läd Medieninhalte aus einer Dropbox und kann diese als ein Interaktieves Bücherregal anzeigen. Es können Texte, Bilder, Videos und  Audios angezeigt beziehungsweise abgespielt werden. Die Medieninhalte sind wie in einem Buch angeordnet und können auf einer Buchseite angezeit beziehungsweise abgespielt werden. Außerdem gibt es ein Daumenkino, das Audiosequenzen abspielen und dabei Biler und Text anzeigen kann.
