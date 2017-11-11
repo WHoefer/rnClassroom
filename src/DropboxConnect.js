@@ -1,5 +1,7 @@
 import RNFetchBlob from 'react-native-fetch-blob';
 import { createDirs } from './FileSystem';
+import {logger, loggerBookshelf} from './util/logging';
+
 
 
 const DROPBOX_URL_FILE_DOWNLOAD = 'https://content.dropboxapi.com/2/files/download';
@@ -102,7 +104,7 @@ export const getFileList = (accesstoken, path, responseHandler) => {
 *
 *
 *******************************************************************************/
-export const filesDownload = (accesstoken, indexSourcePathes, sourcePathes, targetPath, responseHandler) => {
+export const filesDownload = (log, accesstoken, indexSourcePathes, sourcePathes, targetPath, responseHandler) => {
  if(indexSourcePathes >= 0){
    const target = `${targetPath}${sourcePathes[indexSourcePathes]}`;
    RNFetchBlob.fs.exists(target).then((exist) => {
@@ -112,7 +114,7 @@ export const filesDownload = (accesstoken, indexSourcePathes, sourcePathes, targ
        copy = true;
      }
      if(copy){
-      console.log(`Copy from DropBox ${sourcePathes[indexSourcePathes]} to local ${target}`);
+      logger(1, log, 'filesDownload',`Copy from DropBox ${sourcePathes[indexSourcePathes]} to local ${target}`);
       //const dirs = RNFetchBlob.fs.dirs;
       const headers = {
         'Authorization': `Bearer ${accesstoken}`,
@@ -123,14 +125,14 @@ export const filesDownload = (accesstoken, indexSourcePathes, sourcePathes, targ
       }).fetch('POST', DROPBOX_URL_FILE_DOWNLOAD,headers).then((res) => {
         //progressHandler({content: res});
         --indexSourcePathes;
-        filesDownload(accesstoken, indexSourcePathes, sourcePathes, targetPath, responseHandler)
+        filesDownload(log, accesstoken, indexSourcePathes, sourcePathes, targetPath, responseHandler)
       }).catch((errorMessage, statusCode) => {
         responseHandler({statusCode: statusCode, errorMessage: errorMessage, content: null});
       });
     }else{ // if(!exist)
-      console.log(`Exist in DropBox ${sourcePathes[indexSourcePathes]} and local ${target}. NO copy.`);
+      logger(1, log, 'filesDownload',`Exist in DropBox ${sourcePathes[indexSourcePathes]} and local ${target}. NO copy.`);
       --indexSourcePathes;
-      filesDownload(accesstoken, indexSourcePathes, sourcePathes, targetPath, responseHandler)
+      filesDownload(log, accesstoken, indexSourcePathes, sourcePathes, targetPath, responseHandler)
     }
    }).catch(() => {
      responseHandler({
@@ -201,11 +203,12 @@ export const getFileDownload = (accesstoken, sourcPath, targePath, responseHandl
 * getJsonFilesContent an den responsetHandler übergeben.
 *
 *****************************************************************************/
-export const getFilesToCopy = (accesstoken, responseHandler) => {
+export const getFilesToCopy = (log, accesstoken, responseHandler) => {
   getJsonFileContent(accesstoken, '/bookshelf.json', (obj) => {
     if( obj.statusCode === 200 ){
-      console.log('--- getJsonFileContent OK ---');
+      logger(1, log, 'getJsonFileContent', 'bookshelf.json');
       const bookShelf = obj.content;
+      loggerBookshelf(2, log, bookShelf);
       const pathes = [
         bookShelf.imagePath,
         bookShelf.audioPath,
@@ -220,7 +223,8 @@ export const getFilesToCopy = (accesstoken, responseHandler) => {
         let files = [];
         const resourcesArray = obj.responses;
         if( obj.statusCode === 200 ){
-          console.log('--- getJsonFilesContent OK ---');
+          logger(1, log, 'getJsonFilesContent statusCode', obj.statusCode);
+          logger(1, log, 'getJsonFilesContent errorMessage', obj.errorMessage);
           files.push('/bookshelf.json');
           for (var i = 0; i < resourcesArray.length; i++) {
             files.push(`${resourcesArray[i].sourcePath}/resources.json`);
@@ -250,32 +254,33 @@ export const getFilesToCopy = (accesstoken, responseHandler) => {
 *
 *
 *****************************************************************************/
-export const updateLocal = (accesstoken, localPath, responseHandler) => {
-  console.log('!!!!!!! updateLocal !!!!!!!!!!');
-  getFilesToCopy(accesstoken, (obj) => {
+export const updateLocal = (log, accesstoken, localPath, responseHandler) => {
+  logger(1, log, 'updateLocal', 'Start');
+  getFilesToCopy(log, accesstoken, (obj) => {
     if( obj.statusCode === 200 ){
-      console.log(JSON.stringify(obj.responses.pathes));
+      //console.log(JSON.stringify(obj.responses.pathes));
       const bookShelf = obj.responses.bookShelf;
       const resourcesArray = obj.responses.resourcesArray;
       const files = obj.responses.files;
       const pathes = obj.responses.pathes;
       const index =  pathes.length-1;
-      console.log('!!!!!!! CreateDirs !!!!!!!!!!');
+      logger(1, log, 'CreateDirs', 'Start');
       createDirs(index, pathes, localPath, (obj) => {
         if( obj.statusCode === 200 ){
           const index =  files.length-1;
-          console.log('!!!!!!! filesDownload !!!!!!!!!!');
-          filesDownload(accesstoken, index, files, localPath, (obj) => {
+          logger(1, log, 'filesDownload', 'Start');
+          filesDownload(log, accesstoken, index, files, localPath, (obj) => {
             responseHandler(obj);
           });
         }else{
-          console.log('!!!!!!! error createDirs !!!!!!!!!!');
+          logger(3, log, 'error createDirs', ' ');
+          logger(3, log, 'response', JSON.stringify(obj));
           responseHandler(obj);
         }
       }); // createDirs(index, pathes, (obj)
     } else {
-      console.log('!!!!!!! error getFilesToCopy !!!!!!!!!!');
-      console.log(JSON.stringify(obj));
+      logger(2, log, 'error getFilesToCopy');
+      logger(3, log, 'response from getFilesToCopy',JSON.stringify(obj));
       responseHandler(obj);
     }
   }); // getFilesToCopy(accesstoken, (obj) => {
