@@ -258,7 +258,6 @@ export const updateLocal = (log, accesstoken, localPath, responseHandler) => {
   logger(1, log, 'updateLocal', 'Start');
   getFilesToCopy(log, accesstoken, (obj) => {
     if( obj.statusCode === 200 ){
-      //console.log(JSON.stringify(obj.responses.pathes));
       const bookShelf = obj.responses.bookShelf;
       const resourcesArray = obj.responses.resourcesArray;
       const files = obj.responses.files;
