@@ -2,16 +2,19 @@ import RNFetchBlob from 'react-native-fetch-blob';
 import {logger, loggerBookshelf} from './util/logging';
 
 export const getLocalRecourses = (log, path, responseHandler) => {
+  let response = [];
   logger(1, log, 'getLocalRecourses from', path);
   getLocalJsonFile(path+'/bookshelf.json',  (obj) => {
      if(obj){
        logger(2, log, 'getLocalJsonFile', 'bookshelf.json');
        const bookShelf = obj;
+       response.push({DATA: bookShelf.data});
        loggerBookshelf(3, log, bookShelf);
        getLocalJsonFile(path+bookShelf.imagePath+'/resources.json',  (objImage) => {
          if(objImage && objImage.type === 'IMAGE'){
            logger(2, log, 'getLocalJsonFile', path+bookShelf.imagePath+'/resources.json');
            const array = objImage.content
+           response.push({IMAGE: array});
            for (var i = 0; i < array.length; i++) {
              let key = array[i].key;
              let value  = array[i].value;
@@ -21,6 +24,7 @@ export const getLocalRecourses = (log, path, responseHandler) => {
              if(objAudio && objAudio.type === 'AUDIO'){
                logger(2, log, 'getLocalJsonFile', path+bookShelf.audioPath+'/resources.json');
                const array = objAudio.content
+               response.push({AUDIO: array});
                for (var i = 0; i < array.length; i++) {
                  let key = array[i].key;
                  let value  = array[i].value;
@@ -30,6 +34,7 @@ export const getLocalRecourses = (log, path, responseHandler) => {
                  if(objVideo && objVideo.type === 'VIDEO'){
                    logger(2, log, 'getLocalJsonFile', path+bookShelf.videoPath+'/resources.json');
                    const array = objVideo.content
+                   response.push({VIDEO: array});
                    for (var i = 0; i < array.length; i++) {
                      let key = array[i].key;
                      let value  = array[i].value;
@@ -39,17 +44,51 @@ export const getLocalRecourses = (log, path, responseHandler) => {
                      if(objFlipBook && objFlipBook.type === 'FLIPBOOK'){
                        logger(2, log, 'getLocalJsonFile', path+bookShelf.flipBookPath+'/resources.json');
                        const array = objFlipBook.content
+                       response.push({FLIPBOOK: array});
                        for (var i = 0; i < array.length; i++) {
                          let key = array[i].key;
                          let value  = array[i].value;
                          logger(2, log, 'getLocalJsonFile', `Key: ${key} Value: ${value}`);
                        }
-                       responseHandler({
-                         //TODO
-                         // Fileliste zurückgeben
-                         statusCode: 200,
-                         errorMessage: `No Errors`
-                       });
+                       getLocalJsonFile(path+bookShelf.sequencePath+'/resources.json',  (objSequence) => {
+                         if(objSequence && objSequence.type === 'SEQUENCE'){
+                           logger(2, log, 'getLocalJsonFile', path+bookShelf.sequencePath+'/resources.json');
+                           const array = objSequence.content
+                           response.push({SEQUENCE: array});
+                           for (var i = 0; i < array.length; i++) {
+                             let key = array[i].key;
+                             let value  = array[i].value;
+                             logger(2, log, 'getLocalJsonFile', `Key: ${key} Value: ${value}`);
+                           }
+                           getLocalJsonFile(path+bookShelf.pagePath+'/resources.json',  (objPage) => {
+                             if(objPage && objPage.type === 'PAGE'){
+                               logger(2, log, 'getLocalJsonFile', path+bookShelf.pagePath+'/resources.json');
+                               const array = objPage.content
+                               response.push({PAGE: array});
+                               for (var i = 0; i < array.length; i++) {
+                                 let key = array[i].key;
+                                 let value  = array[i].value;
+                                 logger(2, log, 'getLocalJsonFile', `Key: ${key} Value: ${value}`);
+                               }
+                               responseHandler({
+                                 statusCode: 200,
+                                 errorMessage: `No Errors`,
+                                 content: response
+                               });
+                             }else{
+                               responseHandler({
+                                 statusCode: 0,
+                                 errorMessage: `Error: No content from ${path}${bookShelf.pagePath}/resources.json`
+                               });
+                             }
+                           });// getLocalJsonFile(path+bookShelf.pagePath+'/resources.json',  (objPage) => {
+                         }else{
+                           responseHandler({
+                             statusCode: 0,
+                             errorMessage: `Error: No content from ${path}${bookShelf.sequencePath}/resources.json`
+                           });
+                         }
+                       });// getLocalJsonFile(path+bookShelf.sequencePath+'/resources.json',  (objSequence) => {
                      }else{
                        responseHandler({
                          statusCode: 0,
