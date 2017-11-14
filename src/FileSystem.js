@@ -1,6 +1,18 @@
 import RNFetchBlob from 'react-native-fetch-blob';
 import {logger, loggerBookshelf} from './util/logging';
 
+const getAssociativeArray = (log, obj, array, path) => {
+  logger(2, log, 'getLocalJsonFile', path);
+  const data = obj.content
+  for (var i = 0; i < data.length; i++) {
+    let key = data[i].key;
+    let value  = data[i].value;
+    array[key] = value;
+    logger(2, log, 'getLocalJsonFile', `Key: ${key} Value: ${value}`);
+  }
+  return array;
+}
+
 export const getLocalRecourses = (log, path, responseHandler) => {
   let response = [];
   logger(1, log, 'getLocalRecourses from', path);
@@ -8,68 +20,26 @@ export const getLocalRecourses = (log, path, responseHandler) => {
      if(obj){
        logger(2, log, 'getLocalJsonFile', 'bookshelf.json');
        const bookShelf = obj;
-       response.push({DATA: bookShelf.data});
+       response.push(bookShelf);
        loggerBookshelf(3, log, bookShelf);
        getLocalJsonFile(path+bookShelf.imagePath+'/resources.json',  (objImage) => {
          if(objImage && objImage.type === 'IMAGE'){
-           logger(2, log, 'getLocalJsonFile', path+bookShelf.imagePath+'/resources.json');
-           const array = objImage.content
-           response.push({IMAGE: array});
-           for (var i = 0; i < array.length; i++) {
-             let key = array[i].key;
-             let value  = array[i].value;
-             logger(2, log, 'getLocalJsonFile', `Key: ${key} Value: ${value}`);
-           }
+           response.push(getAssociativeArray(log, objImage, imgA = [], path+bookShelf.imagePath+'/resources.json'));
            getLocalJsonFile(path+bookShelf.audioPath+'/resources.json',  (objAudio) => {
              if(objAudio && objAudio.type === 'AUDIO'){
-               logger(2, log, 'getLocalJsonFile', path+bookShelf.audioPath+'/resources.json');
-               const array = objAudio.content
-               response.push({AUDIO: array});
-               for (var i = 0; i < array.length; i++) {
-                 let key = array[i].key;
-                 let value  = array[i].value;
-                 logger(2, log, 'getLocalJsonFile', `Key: ${key} Value: ${value}`);
-               }
+               response.push(getAssociativeArray(log, objAudio, audA = [], path+bookShelf.audioPath+'/resources.json'));
                getLocalJsonFile(path+bookShelf.videoPath+'/resources.json',  (objVideo) => {
                  if(objVideo && objVideo.type === 'VIDEO'){
-                   logger(2, log, 'getLocalJsonFile', path+bookShelf.videoPath+'/resources.json');
-                   const array = objVideo.content
-                   response.push({VIDEO: array});
-                   for (var i = 0; i < array.length; i++) {
-                     let key = array[i].key;
-                     let value  = array[i].value;
-                     logger(2, log, 'getLocalJsonFile', `Key: ${key} Value: ${value}`);
-                   }
+                   response.push(getAssociativeArray(log, objVideo, vidA = [], path+bookShelf.videoPath+'/resources.json'));
                    getLocalJsonFile(path+bookShelf.flipBookPath+'/resources.json',  (objFlipBook) => {
                      if(objFlipBook && objFlipBook.type === 'FLIPBOOK'){
-                       logger(2, log, 'getLocalJsonFile', path+bookShelf.flipBookPath+'/resources.json');
-                       const array = objFlipBook.content
-                       response.push({FLIPBOOK: array});
-                       for (var i = 0; i < array.length; i++) {
-                         let key = array[i].key;
-                         let value  = array[i].value;
-                         logger(2, log, 'getLocalJsonFile', `Key: ${key} Value: ${value}`);
-                       }
+                       response.push(getAssociativeArray(log, objFlipBook, flbA = [], path+bookShelf.flipBookPath+'/resources.json'));
                        getLocalJsonFile(path+bookShelf.sequencePath+'/resources.json',  (objSequence) => {
                          if(objSequence && objSequence.type === 'SEQUENCE'){
-                           logger(2, log, 'getLocalJsonFile', path+bookShelf.sequencePath+'/resources.json');
-                           const array = objSequence.content
-                           response.push({SEQUENCE: array});
-                           for (var i = 0; i < array.length; i++) {
-                             let key = array[i].key;
-                             let value  = array[i].value;
-                             logger(2, log, 'getLocalJsonFile', `Key: ${key} Value: ${value}`);
-                           }
+                           response.push(getAssociativeArray(log, objSequence, seqA = [], path+bookShelf.sequencePath+'/resources.json'));
                            getLocalJsonFile(path+bookShelf.pagePath+'/resources.json',  (objPage) => {
                              if(objPage && objPage.type === 'PAGE'){
-                               logger(2, log, 'getLocalJsonFile', path+bookShelf.pagePath+'/resources.json');
-                               const array = objPage.content
-                               response.push({PAGE: array});
-                               for (var i = 0; i < array.length; i++) {
-                                 let key = array[i].key;
-                                 let value  = array[i].value;
-                                 logger(2, log, 'getLocalJsonFile', `Key: ${key} Value: ${value}`);
-                               }
+                               response.push(getAssociativeArray(log, objPage, pagA = [], path+bookShelf.pagePath+'/resources.json'));
                                responseHandler({
                                  statusCode: 200,
                                  errorMessage: `No Errors`,
