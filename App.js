@@ -101,6 +101,7 @@ export default class App extends Component<{}> {
       localFileList: '...',
       updateLocal: '...',
       updateBookshelf: '...',
+      localResources: null,
       a: false,
       b: false,
       c: false,
@@ -129,7 +130,7 @@ componentWillMount(){
   //updateLocal(true, ACCESSTOKEN, localPath ,  (obj) => {this.setState({updateLocal: obj, h: true})});
 
   getLocalJsonFile(localPath+'/bookshelf.json', (obj) => {this.setState({updateBookshelf: obj, i: true})});
-  getLocalRecourses(true, localPath, (obj) => {this.setState({ j: true })} )
+  getLocalRecourses(true, localPath, (obj) => {this.setState({ localResources: obj, j: true })} )
 }
 
 
@@ -162,6 +163,19 @@ render() {
         {/*renderText('updateContent', `updateContent: ${JSON.stringify(this.state.updateContent)}`)*/}
         {/*renderText('updateLocal', `updateLocal: ${JSON.stringify(this.state.updateLocal)}`)*/}
         {renderText('FlipBookPath', `FlipBookPath from local bookshelf.json: ${this.state.updateBookshelf.imagePath}`)}
+        {renderText('LocalResources1', `IMAGES: ${this.state.localResources.content[1]['img001']}`)}
+        {renderText('LocalResources11', `IMAGES: ${this.state.localResources.content[1]['img002']}`)}
+        {renderText('LocalResources2', `AUDIOS: ${this.state.localResources.content[2]['audio001']}`)}
+        {renderText('LocalResources22', `AUDIOS: ${this.state.localResources.content[2]['audio002']}`)}
+        {renderText('LocalResources3', `VIDEO: ${this.state.localResources.content[3]['video001']}`)}
+        {renderText('LocalResources33', `VIDEO: ${this.state.localResources.content[3]['video002']}`)}
+        {renderText('LocalResources4', `FLIPBOOK: ${this.state.localResources.content[4]['flip001']}`)}
+        {renderText('LocalResources44', `FLIPBOOK: ${this.state.localResources.content[4]['flip002']}`)}
+        {renderText('LocalResources5', `SEQUENCE: ${this.state.localResources.content[5]['seq001']}`)}
+        {renderText('LocalResources55', `SEQUENCE: ${this.state.localResources.content[5]['seq002']}`)}
+        {renderText('LocalResources6', `PAGE: ${this.state.localResources.content[6]['page001']}`)}
+        {renderText('LocalResources66', `PAGE: ${this.state.localResources.content[6]['page002']}`)}
+        {renderText('BOOKSHELF', `BOOKSHELF: ${JSON.stringify(this.state.localResources.content[0])}`)}
       </ScrollView>
     );
   }
