@@ -22,7 +22,15 @@ import {
   createDir,
   getFileList as localFileList,
   getLocalJsonFile,
-  getLocalRecourses } from './src/FileSystem';
+  getLocalRecourses,
+  getImagePath,
+  getAudioPath,
+  getVideoPath,
+  getFlipbookPath,
+  getSequencePath,
+  getPagePath,
+  getImageUri,
+} from './src/FileSystem';
 import { ACCESSTOKEN } from './accesstoken';
 
 
@@ -145,9 +153,11 @@ render() {
     this.state.i &&
     this.state.j
   ){
+    const  resource  = this.state.localResources;
     return (
       <ScrollView style={styles.container}>
-        <Image source={{'uri': 'file:///storage/2159-1A0C/Test/images/Koala.jpg'}} style={{width: 100, height: 100}} />
+        <Image source={getImageUri(resource, 'img001')} style={{width: 100, height: 100}} />
+        <Image source={getImageUri(resource, 'img002')} style={{width: 100, height: 100}} />
         <Image source={require('./assets/Koala.jpg')} style={{width: 200, height: 200}} />
         {textOutputRaw(this.state.localFileList)}
         {/*textOutput(this.state.fileList)*/}
@@ -163,18 +173,18 @@ render() {
         {/*renderText('updateContent', `updateContent: ${JSON.stringify(this.state.updateContent)}`)*/}
         {/*renderText('updateLocal', `updateLocal: ${JSON.stringify(this.state.updateLocal)}`)*/}
         {renderText('FlipBookPath', `FlipBookPath from local bookshelf.json: ${this.state.updateBookshelf.imagePath}`)}
-        {renderText('LocalResources1', `IMAGES: ${this.state.localResources.content[1]['img001']}`)}
-        {renderText('LocalResources11', `IMAGES: ${this.state.localResources.content[1]['img002']}`)}
-        {renderText('LocalResources2', `AUDIOS: ${this.state.localResources.content[2]['audio001']}`)}
-        {renderText('LocalResources22', `AUDIOS: ${this.state.localResources.content[2]['audio002']}`)}
-        {renderText('LocalResources3', `VIDEO: ${this.state.localResources.content[3]['video001']}`)}
-        {renderText('LocalResources33', `VIDEO: ${this.state.localResources.content[3]['video002']}`)}
-        {renderText('LocalResources4', `FLIPBOOK: ${this.state.localResources.content[4]['flip001']}`)}
-        {renderText('LocalResources44', `FLIPBOOK: ${this.state.localResources.content[4]['flip002']}`)}
-        {renderText('LocalResources5', `SEQUENCE: ${this.state.localResources.content[5]['seq001']}`)}
-        {renderText('LocalResources55', `SEQUENCE: ${this.state.localResources.content[5]['seq002']}`)}
-        {renderText('LocalResources6', `PAGE: ${this.state.localResources.content[6]['page001']}`)}
-        {renderText('LocalResources66', `PAGE: ${this.state.localResources.content[6]['page002']}`)}
+        {renderText('LocalResources1', `IMAGES: ${getImagePath(this.state.localResources, 'img001')}`)}
+        {renderText('LocalResources11', `IMAGES: ${getImagePath(this.state.localResources, 'img002')}`)}
+        {renderText('LocalResources2', `AUDIOS: ${getAudioPath(resource, 'audio001')}`)}
+        {renderText('LocalResources22', `AUDIOS: ${getAudioPath(resource, 'audio002')}`)}
+        {renderText('LocalResources3', `VIDEO: ${getVideoPath(resource,'video001')}`)}
+        {renderText('LocalResources33', `VIDEO: ${getVideoPath(resource,'video002')}`)}
+        {renderText('LocalResources4', `FLIPBOOK: ${getFlipbookPath(resource, 'flip001')}`)}
+        {renderText('LocalResources44', `FLIPBOOK: ${getFlipbookPath(resource, 'flip002')}`)}
+        {renderText('LocalResources5', `SEQUENCE: ${getSequencePath(resource, 'seq001')}`)}
+        {renderText('LocalResources55', `SEQUENCE: ${getSequencePath(resource, 'seq002')}`)}
+        {renderText('LocalResources6', `PAGE: ${getPagePath(resource, 'page001')}`)}
+        {renderText('LocalResources66', `PAGE: ${getPagePath(resource, 'page002')}`)}
         {renderText('BOOKSHELF', `BOOKSHELF: ${JSON.stringify(this.state.localResources.content[0])}`)}
       </ScrollView>
     );
