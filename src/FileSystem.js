@@ -11,6 +11,10 @@ export const PAGE = 6;
 export const PATH = 7;
 //export const
 
+export const getBookshelfContent = (resource) => {
+    return resource.content[BOOKSHELF].data;
+}
+
 export const getImagePath = (resource, key) => {
     const imageDir = resource.content[BOOKSHELF].imagePath;
     const rootPath = resource.content[PATH];
