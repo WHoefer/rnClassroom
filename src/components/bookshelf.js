@@ -7,29 +7,60 @@ import {
   Image,
 } from 'react-native';
 import { getBookshelfContent } from './../FileSystem';
+import Chapter from './Chapter';
 
 
-const book = (key, mainTitle, subtitle) => {
-  console.log(mainTitle);
+export default class Bookshelf extends React.Component {
+  constructor(props) {
+      super(props);
+      this.state = {
+        key: this.props.key,
+        content: [getBookshelfContent(this.props.resource)],
+        pos: 0,
+      };
+      //this.data;
+  }
+
+
+componentWillMount() {
+     //this.data = getBookshelfContent(this.props.resource);
+}
+
+addContent(cont) {
+    const newContent = this.state.content;
+    const newPos = this.state.pos + 1;
+    newContent[newPos] = cont;
+    //console.log('---->newContent', newContent);
+    this.setState({ content: newContent, pos: newPos });
+}
+
+chapter(key, cont){
   return (
-    <View key={key} style={{flex: 1, flexDirection: 'column', borderWidth: 1}}>
-      <Text>
-        {mainTitle}
-      </Text>
-      <Text>
-        {subtitle}
-      </Text>
-    </View>
-  );
+    <Chapter
+      key={key}
+      id={key}
+      content={cont}
+      onPress={
+        (objArray) => {
+          //console.log('--------->content', objArray);
+          //this.data = objArray;
+          this.addContent(objArray);
+        }
+      }
+    />);
 };
 
-export const Bookshelf = (resource: object) => {
-  const data = getBookshelfContent(resource.resource);
-  const rows = [];
+render() {
+  const { pos, content } = this.state;
+  const data = content[pos];
+  let rows = [];
   for (var i = 0; i < data.length; i++) {
     const row = data[i];
-    rows[i] = book(i, row.MainTitle, row.SubTitle);
+    rows[i] = this.chapter(i, row);
+    console.log(`${i} MainTitle: ${row.MainTitle}`);
   }
-  return(rows);
+  const lines = rows;
+  return(<View>{lines}</View>);
 
 };
+}

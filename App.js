@@ -33,7 +33,7 @@ import {
   getBookshelfContent,
 } from './src/FileSystem';
 import { ACCESSTOKEN } from './accesstoken';
-import { Bookshelf } from './src/components/bookshelf';
+import Bookshelf from './src/components/bookshelf';
 import { Menu } from './src/components/menu';
 
 
