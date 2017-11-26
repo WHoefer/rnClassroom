@@ -26,11 +26,21 @@ componentWillMount() {
      //this.data = getBookshelfContent(this.props.resource);
 }
 
+
+
+componentWillReceiveProps(nextProps){
+  //console.log('--->nextProps', JSON.stringify(nextProps));
+  this.setState({pos: nextProps.pos});
+}
+
+
+
 addContent(cont) {
     const newContent = this.state.content;
     const newPos = this.state.pos + 1;
     newContent[newPos] = cont;
     //console.log('---->newContent', newContent);
+    this.props.onForward(newPos);
     this.setState({ content: newContent, pos: newPos });
 }
 
@@ -51,16 +61,22 @@ chapter(key, cont){
 };
 
 render() {
+  console.log('------------> Render Bookshelf');
   const { pos, content } = this.state;
   const data = content[pos];
   let rows = [];
-  for (var i = 0; i < data.length; i++) {
-    const row = data[i];
-    rows[i] = this.chapter(i, row);
-    console.log(`${i} MainTitle: ${row.MainTitle}`);
+  if (typeof data === 'object') {
+    for (var i = 0; i < data.length; i++) {
+      const row = data[i];
+      const key = row.Type + pos + i
+      rows[i] = this.chapter(key, row);
+      console.log(`${key} MainTitle: ${row.MainTitle}`);
+    }
+    const lines = rows;
+    return(<View>{lines}</View>);
+  } else {
+    return(<View><Text>{JSON.stringify(data)}</Text></View>);
   }
-  const lines = rows;
-  return(<View>{lines}</View>);
 
 };
 }

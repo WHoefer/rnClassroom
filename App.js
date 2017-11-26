@@ -104,6 +104,7 @@ export default class App extends Component<{}> {
   super(props);
 
   this.state = {
+      pos: 0,
       listLoaded: false,
       fileList: null,
       fileListImages: null,
@@ -157,15 +158,31 @@ render() {
     this.state.j
   ){
     const  resource  = this.state.localResources;
-    console.log('-------+++>', resource.content[0].data);
+    //console.log('-------+++>', resource.content[0].data);
     return (
-      <Menu onPressBack={ () => {console.log('PressBack');}}>
+      <Menu onPressBack={ () => {
+          console.log('PressBack');
+          if(this.state.pos > 0){
+            const pos = this.state.pos -1;
+            this.setState({pos})
+          }
+        }}>
         <ScrollView style={styles.container}>
-          <Bookshelf resource={resource} />
+          <Bookshelf
+            resource={resource}
+            pos={this.state.pos}
+            onForward={
+              (newpos) => {
+                this.setState({pos: newpos});
+              }
+            }
+          />
+          {/*
           <Image source={getImageUri(resource, 'img001')} style={{width: 100, height: 100}} />
           <Image source={getImageUri(resource, 'img002')} style={{width: 100, height: 100}} />
           <Image source={require('./assets/Koala.jpg')} style={{width: 200, height: 200}} />
           {textOutputRaw(this.state.localFileList)}
+          */}
           {/*textOutput(this.state.fileList)*/}
           {/*textOutput(this.state.fileListImages)*/}
           {/*renderText('bookshelf', this.state.fileBookShelf.content)*/}
@@ -178,6 +195,10 @@ render() {
           {/*listOutput(this.state.localFileList)*/}
           {/*renderText('updateContent', `updateContent: ${JSON.stringify(this.state.updateContent)}`)*/}
           {/*renderText('updateLocal', `updateLocal: ${JSON.stringify(this.state.updateLocal)}`)*/}
+
+
+
+{/*
           {renderText('FlipBookPath', `FlipBookPath from local bookshelf.json: ${this.state.updateBookshelf.imagePath}`)}
           {renderText('LocalResources1', `IMAGES: ${getImagePath(this.state.localResources, 'img001')}`)}
           {renderText('LocalResources11', `IMAGES: ${getImagePath(this.state.localResources, 'img002')}`)}
@@ -192,6 +213,8 @@ render() {
           {renderText('LocalResources6', `PAGE: ${getPagePath(resource, 'page001')}`)}
           {renderText('LocalResources66', `PAGE: ${getPagePath(resource, 'page002')}`)}
           {renderText('BOOKSHELF', `BOOKSHELF: ${JSON.stringify(getBookshelfContent(resource)[0].MainTitle)}`)}
+
+    */}
         </ScrollView>
       </Menu>
   );
