@@ -33,7 +33,7 @@ import {
   getBookshelfContent,
 } from './src/FileSystem';
 import { ACCESSTOKEN } from './accesstoken';
-import Bookshelf from './src/components/bookshelf';
+import Bookshelf from './src/components/Bookshelf';
 import { Menu } from './src/components/menu';
 
 
@@ -139,7 +139,7 @@ componentWillMount(){
   //getFileDownload(ACCESSTOKEN, '/bookshelf.json', '/bookshelf.json', () => { this.setState({listLoaded: true, f: true}); });
   //getFilesToCopy(false, ACCESSTOKEN, (obj) => {this.setState({updateContent: obj, g: true})});
 
-  //updateLocal(true, ACCESSTOKEN, localPath ,  (obj) => {this.setState({updateLocal: obj, h: true})});
+  updateLocal(true, ACCESSTOKEN, localPath ,  (obj) => {this.setState({updateLocal: obj, h: true})});
 
   getLocalJsonFile(localPath+'/bookshelf.json', (obj) => {this.setState({updateBookshelf: obj, i: true})});
   getLocalRecourses(true, localPath, (obj) => {this.setState({ localResources: obj, j: true })} )
@@ -153,7 +153,7 @@ render() {
     this.state.b &&
     //this.state.c && this.state.d && this.state.e && this.state.f
     //&& this.state.g
-    //this.state.h &&
+    this.state.h &&
     this.state.i &&
     this.state.j
   ){

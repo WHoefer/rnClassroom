@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { getBookshelfContent } from './../FileSystem';
 import Chapter from './Chapter';
+import Page from './Page';
 
 
 export default class Bookshelf extends React.Component {
@@ -16,6 +17,7 @@ export default class Bookshelf extends React.Component {
       this.state = {
         key: this.props.key,
         content: [getBookshelfContent(this.props.resource)],
+        resource: this.props.resource,
         pos: 0,
       };
       //this.data;
@@ -44,7 +46,7 @@ addContent(cont) {
     this.setState({ content: newContent, pos: newPos });
 }
 
-chapter(key, cont){
+renderChapter(key, cont){
   return (
     <Chapter
       key={key}
@@ -60,22 +62,33 @@ chapter(key, cont){
     />);
 };
 
+renderPage(key, data, resource){
+  return (
+    <Page
+      key={key}
+      id={key}
+      data={data}
+      resource={resource}
+    />
+  );
+}
+
 render() {
   console.log('------------> Render Bookshelf');
-  const { pos, content } = this.state;
+  const { pos, content, resource } = this.state;
   const data = content[pos];
   let rows = [];
   if (typeof data === 'object') {
     for (var i = 0; i < data.length; i++) {
       const row = data[i];
       const key = row.Type + pos + i
-      rows[i] = this.chapter(key, row);
+      rows[i] = this.renderChapter(key, row);
       console.log(`${key} MainTitle: ${row.MainTitle}`);
     }
     const lines = rows;
     return(<View>{lines}</View>);
   } else {
-    return(<View><Text>{JSON.stringify(data)}</Text></View>);
+    return(this.renderPage("page", data, resource));
   }
 
 };
