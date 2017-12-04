@@ -3,9 +3,15 @@ import React from 'react';
 import {
   Text,
   View,
-  TouchableHighlight
+  TouchableHighlight,
+  Image,
 } from 'react-native';
-import { getPagePath, getLocalJsonFile } from './../FileSystem';
+import {
+  getPagePath,
+  getLocalJsonFile,
+  getImageUri,
+} from './../FileSystem';
+import { FormatedText } from './FormatedText';
 
 
 export default class Page extends React.Component {
@@ -44,9 +50,93 @@ export default class Page extends React.Component {
     }
   }
 
+
+ renderText(key, obj){
+   return (FormatedText(key, obj.content));
+ }
+
+ renderVideo(key, obj){
+   const { resource } = this.state;
+   return (
+     <View key={key+obj.type}>
+      <Text >
+        {obj.content}
+      </Text>
+     </View>
+   );
+ }
+
+ renderImage(key, obj){
+   const { resource } = this.state;
+   return (
+     <View key={key+obj.type} style={{flex: 1, width: 400, height: 300  }}>
+      <Image source={getImageUri(resource, obj.content)} style={{width: 400, height: 300  }} />
+     </View>
+   );
+ }
+
+ renderAudio(key, obj){
+   const { resource } = this.state;
+   return (
+     <View key={key+obj.type}>
+      <Text >
+        {obj.content}
+      </Text>
+     </View>
+   );
+ }
+
+ renderFlipbook(key, obj){
+   const { resource } = this.state;
+   return (
+     <View key={key+obj.type}>
+      <Text >
+        {obj.content}
+      </Text>
+     </View>
+   );
+ }
+
+ renderDelimiter(key, obj){
+   const { resource } = this.state;
+   return (
+     <View key={key+obj.type}>
+      <Text >
+        {obj.content}
+      </Text>
+     </View>
+   );
+ }
+
+
  renderPage(){
    const { data, resource, id, title, subtitle, backgroundColor, sequences} = this.state;
-
+    let viewArray = [];
+    for (var i = 0; i < sequences.length; i++) {
+      const obj = sequences[i];
+      switch (obj.type) {
+        case 'TEXT':
+          viewArray.push(this.renderText(i, obj));
+          break;
+        case 'VIDEO':
+          viewArray.push(this.renderVideo(i, obj));
+          break;
+        case 'IMAGE':
+          viewArray.push(this.renderImage(i, obj));
+          break;
+        case 'AUDIO':
+          viewArray.push(this.renderAudio(i, obj));
+          break;
+        case 'FLIPBOOK':
+          viewArray.push(this.renderFlipbook(i, obj));
+          break;
+        case 'DELIMITER':
+          viewArray.push(this.renderDelimiter(i, obj));
+          break;
+        default:
+          viewArray.push(this.renderText(i, {content: 'Unbekanntes Objekt!', type: '???'}));
+      }
+    }
     return (
       <View>
       <Text key={id+'titel'}>
@@ -58,9 +148,7 @@ export default class Page extends React.Component {
       <Text key={id+'backgroundColor'}>
         {backgroundColor}
       </Text>
-      <Text key={id+'sequences'}>
-        {JSON.stringify(sequences)}
-      </Text>
+      {viewArray}
       </View>
     );
  }
