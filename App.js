@@ -20,6 +20,7 @@ import {
 import {
   createDirs,
   createDir,
+  fileExists,
   getFileList as localFileList,
   getLocalJsonFile,
   getLocalRecourses,
@@ -104,11 +105,15 @@ export default class App extends Component<{}> {
   super(props);
 
   this.state = {
+      localPath: RNFetchBlob.fs.dirs.SDCardDir+'/Test',
+      localPathImages: RNFetchBlob.fs.dirs.SDCardDir+ '/Test/images',
+      localPathBookshelf: RNFetchBlob.fs.dirs.SDCardDir+ '/Test/bookshelf.json',
       pos: 0,
       listLoaded: false,
       fileList: null,
       fileListImages: null,
       fileBookShelf: null,
+      bookShelfExist: false,
       createdImagePath: '...',
       localFileList: '...',
       updateLocal: '...',
@@ -129,44 +134,58 @@ export default class App extends Component<{}> {
 
 
 componentWillMount(){
-  const localPath = RNFetchBlob.fs.dirs.SDCardDir+'/Test';
-  const localPathImages = localPath + '/images';
+  const {localPath, localPathBookshelf} = this.state;
+  fileExists(localPathBookshelf, (obj) => {
+    if(obj){
+      getLocalRecourses(true, localPath, (obj) => {
+          this.setState({ localResources: obj });
+      });
+    } else {
+      updateLocal(true, ACCESSTOKEN, localPath ,  (obj) => {
+        getLocalRecourses(true, localPath, (obj) => {
+            this.setState({ localResources: obj });
+        });
+      });
+    }
+  })
   //createDir(RNFetchBlob.fs.dirs.DocumentDir+'/images', (obj) => {this.setState({createdImagePath: obj, a: true})});
-  localFileList(localPathImages, (obj) => {this.setState({localFileList: obj, b: true})});
+  //localFileList(localPathImages, (obj) => {this.setState({localFileList: obj, b: true})});
   //getJsonFileContent(ACCESSTOKEN, '/bookshelf.json', (obj) => { this.setState({fileBookShelf: obj.content, listLoaded: false, c: true}); });
   //getFileList(ACCESSTOKEN, '', (obj) => { this.setState({fileList: obj.content, listLoaded: false, d: true}); });
   //getFileList(ACCESSTOKEN, '/images', (obj) => { this.setState({fileListImages: obj.content, listLoaded: false, e: true}); });
   //getFileDownload(ACCESSTOKEN, '/bookshelf.json', '/bookshelf.json', () => { this.setState({listLoaded: true, f: true}); });
   //getFilesToCopy(false, ACCESSTOKEN, (obj) => {this.setState({updateContent: obj, g: true})});
 
-  updateLocal(true, ACCESSTOKEN, localPath ,  (obj) => {this.setState({updateLocal: obj, h: true})});
+  //updateLocal(true, ACCESSTOKEN, localPath ,  (obj) => {this.setState({updateLocal: obj, h: true})});
 
-  getLocalJsonFile(localPath+'/bookshelf.json', (obj) => {this.setState({updateBookshelf: obj, i: true})});
-  getLocalRecourses(true, localPath, (obj) => {this.setState({ localResources: obj, j: true })} )
+  //getLocalJsonFile(localPath+'/bookshelf.json', (obj) => {this.setState({updateBookshelf: obj, i: true})});
+  //getLocalRecourses(true, localPath, (obj) => {this.setState({ localResources: obj, j: true })} )
 }
 
 
 
 render() {
-  //getFileDownload('/Penguins.jpg', '/Penguins.jpg');
-  if(
-    this.state.b &&
-    //this.state.c && this.state.d && this.state.e && this.state.f
-    //&& this.state.g
-    this.state.h &&
-    this.state.i &&
-    this.state.j
-  ){
-    const  resource  = this.state.localResources;
+  const  resource  = this.state.localResources;
+  if(resource){
     //console.log('-------+++>', resource.content[0].data);
     return (
-      <Menu onPressBack={ () => {
+      <Menu
+        onPressBack={ () => {
           console.log('PressBack');
           if(this.state.pos > 0){
             const pos = this.state.pos -1;
             this.setState({pos})
           }
-        }}>
+        }}
+        onPressDownload={ () => {
+            console.log('PressDownload');
+            updateLocal(true, ACCESSTOKEN, this.state.localPath ,  (obj) => {
+              getLocalRecourses(true, this.state.localPath, (obj) => {
+                  this.setState({ localResources: obj });
+              });
+            });
+        }}
+      >
         <ScrollView style={styles.container}>
           <Bookshelf
             resource={resource}
