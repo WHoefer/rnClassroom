@@ -63,11 +63,27 @@ export const getImageUri = (resource, key) => {
 }
 
 export const getAudioUri = (resource, key) => {
-    return {'uri': `file://${getAudioPath(resource, key)}`};
+    return {'uri': `${getAudioPath(resource, key)}`};
 }
 
 export const getVideoUri = (resource, key) => {
     return {'uri': `file://${getVideoPath(resource, key)}`};
+}
+
+export const getAudioUris = (resource, key, responseHandler) => {
+  let uriArray = [];
+  sequencePath = getSequencePath(resource, key);
+  getLocalJsonFile(sequencePath, (content) => {
+    if(content.type === 'SEQUENCE'){
+      const data = content.data;
+      for (var i = 0; i < data.length; i++) {
+        let audioKey = data[i].audio;
+        let uri = getAudioUri(resource, audioKey);
+        uriArray.push(uri);
+      }
+      responseHandler(uriArray);
+    }
+  });
 }
 
 const getAssociativeArray = (log, obj, array, path) => {

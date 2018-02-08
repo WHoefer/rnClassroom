@@ -20,13 +20,13 @@ import {
 }*/
 
 
-export const FormatedText= (key, text) => {
+export const FormatedText= (key, text, style, styleFormat) => {
   const str = text;
   const boldPatt = "</B>";
   const italicPatt = "</I>";
   const underlinePatt = "</U>";
   const formatPatt = "</F>";
-  const patt1 = /<B>[\w ]+?<\/B>|<I>[\w ]+?<\/I>|<U>[\w ]+?<\/U>|<F>[\w ]+?<\/F>/g;
+  const patt1 = /<B>.+?<\/B>|<I>.+?<\/I>|<U>.+?<\/U>|<F>.+?<\/F>/g;
 
   let a = [];
   let l = 0;
@@ -35,8 +35,14 @@ export const FormatedText= (key, text) => {
   let formatStr = "";
   let workStr = "";
   let res = "";
+  let pattern = "";
+  let keyCount = 0;
+  let textKey = "";
+  let out = "";
 
   while ((res =patt1.exec(str)) != null) {
+    keyCount++;
+    textKey = key + keyCount;
     endPos = patt1.lastIndex;
     l= res[0].length;
     workStr = str.substring(startPos,endPos-l);
@@ -44,18 +50,21 @@ export const FormatedText= (key, text) => {
       a.push(workStr);
     }
     startPos = endPos;
-    if(boldPatt === str.substring(endPos-5, endPos)){
-      formatStr = <Text style={{fontWeight: 'bold'}} >{res}</Text>
+    pattern = str.substring(endPos-4, endPos);
+    console.log('RES: ', res);
+    out = res[0];
+    out = out.substring(3, out.length-4);
+    if(boldPatt === pattern){
+      formatStr = <Text key={textKey} style={{fontWeight: 'bold'}} >{out}</Text>
     }
-    if(italicPatt === str.substring(endPos-5, endPos)){
-      formatStr = <Text style={{fontStyle: 'italic'}} >{res}</Text>
+    if(italicPatt === pattern){
+      formatStr = <Text key={textKey} style={{fontStyle: 'italic'}} >{out}</Text>
     }
-    if(underlinePatt === str.substring(endPos-5, endPos)){
-      textDecorationLine
-      formatStr = <Text style={{textDecorationLine: 'underline'}} >{res}</Text>
+    if(underlinePatt === pattern){
+      formatStr = <Text key={textKey} style={{textDecorationLine: 'underline'}} >{out}</Text>
     }
-    if(formatPatt === str.substring(endPos-5, endPos)){
-      formatStr = <Text style={{color: 'red'}} >{res}</Text>
+    if(formatPatt === pattern){
+      formatStr = <Text key={textKey} style={styleFormat} >{out}</Text>
     }
     a.push(formatStr);
   }
@@ -63,10 +72,10 @@ export const FormatedText= (key, text) => {
   if(workStr !== null && workStr.length > 0){
     a.push(workStr);
   }
-
+//console.log(a);
   return (
     <View key={key+'formatedText'}>
-     <Text >
+     <Text style={style}>
        {a}
      </Text>
     </View>
