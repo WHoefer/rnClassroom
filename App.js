@@ -7,6 +7,8 @@ import {
   View,
   ScrollView,
   Image,
+  Modal,
+  Button,
 } from 'react-native';
 import RNFetchBlob from 'react-native-fetch-blob'
 import {
@@ -36,6 +38,7 @@ import {
 import { ACCESSTOKEN } from './accesstoken';
 import Bookshelf from './src/components/Bookshelf';
 import { Menu } from './src/components/menu';
+import { styles } from './src/GlobalConfig';
 
 
 
@@ -105,9 +108,9 @@ export default class App extends Component<{}> {
   super(props);
 
   this.state = {
-      localPath: RNFetchBlob.fs.dirs.SDCardDir+'/Test',
-      localPathImages: RNFetchBlob.fs.dirs.SDCardDir+ '/Test/images',
-      localPathBookshelf: RNFetchBlob.fs.dirs.SDCardDir+ '/Test/bookshelf.json',
+      localPath: RNFetchBlob.fs.dirs.DocumentDir+'/Test',
+      localPathImages: RNFetchBlob.fs.dirs.DocumentDir+ '/Test/images',
+      localPathBookshelf: RNFetchBlob.fs.dirs.DocumentDir+ '/Test/bookshelf.json',
       pos: 0,
       listLoaded: false,
       fileList: null,
@@ -119,6 +122,8 @@ export default class App extends Component<{}> {
       updateLocal: '...',
       updateBookshelf: '...',
       localResources: null,
+      infoText: 'Ladevorgang: ',
+      modalVisible: false,
       a: false,
       b: false,
       c: false,
@@ -133,33 +138,40 @@ export default class App extends Component<{}> {
 }
 
 
-componentWillMount(){
+openModal() {
+  this.setState({modalVisible:true});
+}
+
+closeModal() {
+  this.setState({modalVisible:false});
+}
+
+loadHandler(info){
+   //const infoText = this.state.infoText + '\n' +info;
+   this.setState({ infoText: info});
+}
+
+componentDidMount(){
+
   const {localPath, localPathBookshelf} = this.state;
-  fileExists(localPathBookshelf, (obj) => {
-    if(obj){
-      getLocalRecourses(true, localPath, (obj) => {
-          this.setState({ localResources: obj });
-      });
-    } else {
-      updateLocal(true, ACCESSTOKEN, localPath ,  (obj) => {
+  createDir(localPath, (path) => {
+    console.log('------> Path', path);
+    fileExists(localPathBookshelf, (obj) => {
+      if(obj){
         getLocalRecourses(true, localPath, (obj) => {
             this.setState({ localResources: obj });
         });
-      });
-    }
-  })
-  //createDir(RNFetchBlob.fs.dirs.DocumentDir+'/images', (obj) => {this.setState({createdImagePath: obj, a: true})});
-  //localFileList(localPathImages, (obj) => {this.setState({localFileList: obj, b: true})});
-  //getJsonFileContent(ACCESSTOKEN, '/bookshelf.json', (obj) => { this.setState({fileBookShelf: obj.content, listLoaded: false, c: true}); });
-  //getFileList(ACCESSTOKEN, '', (obj) => { this.setState({fileList: obj.content, listLoaded: false, d: true}); });
-  //getFileList(ACCESSTOKEN, '/images', (obj) => { this.setState({fileListImages: obj.content, listLoaded: false, e: true}); });
-  //getFileDownload(ACCESSTOKEN, '/bookshelf.json', '/bookshelf.json', () => { this.setState({listLoaded: true, f: true}); });
-  //getFilesToCopy(false, ACCESSTOKEN, (obj) => {this.setState({updateContent: obj, g: true})});
-
-  //updateLocal(true, ACCESSTOKEN, localPath ,  (obj) => {this.setState({updateLocal: obj, h: true})});
-
-  //getLocalJsonFile(localPath+'/bookshelf.json', (obj) => {this.setState({updateBookshelf: obj, i: true})});
-  //getLocalRecourses(true, localPath, (obj) => {this.setState({ localResources: obj, j: true })} )
+      } else {
+        this.setState({ infoText: ''}, () => { this.openModal() } );
+        updateLocal(true, ACCESSTOKEN, localPath ,  (obj) => {
+          getLocalRecourses(true, localPath, (obj) => {
+            this.closeModal();
+            this.setState({ localResources: obj });
+          });
+        }, (info ) => this.loadHandler(info));
+      }
+    })
+  });
 }
 
 
@@ -179,14 +191,16 @@ render() {
         }}
         onPressDownload={ () => {
             console.log('PressDownload');
+            this.setState({ infoText: ''}, () => { this.openModal() } );
             updateLocal(true, ACCESSTOKEN, this.state.localPath ,  (obj) => {
               getLocalRecourses(true, this.state.localPath, (obj) => {
-                  this.setState({ localResources: obj });
+                this.closeModal();
+                this.setState({ localResources: obj });
               });
-            });
+            }, (info ) => this.loadHandler(info));
         }}
       >
-        <ScrollView style={styles.container}>
+        <ScrollView style={stylesLocal.container}>
           <Bookshelf
             resource={resource}
             pos={this.state.pos}
@@ -196,59 +210,61 @@ render() {
               }
             }
           />
-          {/*
-          <Image source={getImageUri(resource, 'img001')} style={{width: 100, height: 100}} />
-          <Image source={getImageUri(resource, 'img002')} style={{width: 100, height: 100}} />
-          <Image source={require('./assets/Koala.jpg')} style={{width: 200, height: 200}} />
-          {textOutputRaw(this.state.localFileList)}
-          */}
-          {/*textOutput(this.state.fileList)*/}
-          {/*textOutput(this.state.fileListImages)*/}
-          {/*renderText('bookshelf', this.state.fileBookShelf.content)*/}
-          {/*renderText('RNFetchBlob.DocumentDir', `DocumentDir: ${RNFetchBlob.fs.dirs.DocumentDir} `)*/}
-          {/*renderText('RNFetchBlob.CacheDir', `CacheDir: ${RNFetchBlob.fs.dirs.CacheDir} `)*/}
-          {/*renderText('RNFetchBlob.DCIMDir ', `DCIMDir (Android only): ${RNFetchBlob.fs.dirs.DCIMDir } `)*/}
-          {/*renderText('RNFetchBlob.DownloadDir ', `DownloadDir (Android only): ${RNFetchBlob.fs.dirs.DownloadDir } `)*/}
-          {/*renderText('RNFetchBlob.SDCardDir ', `SDCardDir (Android only): ${RNFetchBlob.fs.dirs.SDCardDir } `)*/}
-          {/*renderText('createdImagePath', `created image path: ${this.state.createdImagePath}`)*/}
-          {/*listOutput(this.state.localFileList)*/}
-          {/*renderText('updateContent', `updateContent: ${JSON.stringify(this.state.updateContent)}`)*/}
-          {/*renderText('updateLocal', `updateLocal: ${JSON.stringify(this.state.updateLocal)}`)*/}
-
-
-
-{/*
-          {renderText('FlipBookPath', `FlipBookPath from local bookshelf.json: ${this.state.updateBookshelf.imagePath}`)}
-          {renderText('LocalResources1', `IMAGES: ${getImagePath(this.state.localResources, 'img001')}`)}
-          {renderText('LocalResources11', `IMAGES: ${getImagePath(this.state.localResources, 'img002')}`)}
-          {renderText('LocalResources2', `AUDIOS: ${getAudioPath(resource, 'audio001')}`)}
-          {renderText('LocalResources22', `AUDIOS: ${getAudioPath(resource, 'audio002')}`)}
-          {renderText('LocalResources3', `VIDEO: ${getVideoPath(resource,'video001')}`)}
-          {renderText('LocalResources33', `VIDEO: ${getVideoPath(resource,'video002')}`)}
-          {renderText('LocalResources4', `FLIPBOOK: ${getFlipbookPath(resource, 'flip001')}`)}
-          {renderText('LocalResources44', `FLIPBOOK: ${getFlipbookPath(resource, 'flip002')}`)}
-          {renderText('LocalResources5', `SEQUENCE: ${getSequencePath(resource, 'seq001')}`)}
-          {renderText('LocalResources55', `SEQUENCE: ${getSequencePath(resource, 'seq002')}`)}
-          {renderText('LocalResources6', `PAGE: ${getPagePath(resource, 'page001')}`)}
-          {renderText('LocalResources66', `PAGE: ${getPagePath(resource, 'page002')}`)}
-          {renderText('BOOKSHELF', `BOOKSHELF: ${JSON.stringify(getBookshelfContent(resource)[0].MainTitle)}`)}
-
-    */}
         </ScrollView>
+        <Modal
+              visible={this.state.modalVisible}
+              animationType={'slide'}
+              onRequestClose={() => this.closeModal()}
+          >
+            <View style={stylesLocal.modalContainer}>
+              <View style={stylesLocal.innerContainer}>
+                <Text style={styles.infoTextHeader}>
+                  Bitte warten!
+                  Es müssen Programminhalte aus
+                  der Dropbox auf ihr Handy/Tablet geladen werden:
+                </Text>
+                <Text style={styles.infoText} >{this.state.infoText}</Text>
+                <Button
+                    onPress={() => this.closeModal()}
+                    title="Close modal"
+                >
+                </Button>
+              </View>
+            </View>
+          </Modal>
       </Menu>
   );
   }
   return(
-    <View><Text>Bitte warten!!!</Text></View>
+    <ScrollView style={stylesLocal.container}>
+      <Text style={styles.infoTextHeader}>
+        Bitte warten! /n
+        Vor dem ersten Programmstart müssen Programminhalte aus /n
+        der Dropbox auf ihr Handy/Tablet geladen werden:
+      </Text>
+      <Text style={styles.infoText} >{this.state.infoText}</Text>
+    </ScrollView>
   );
 }
 }
 
-const styles = StyleSheet.create({
+const stylesLocal = StyleSheet.create({
 container: {
   flex: 1,
   //justifyContent: 'center',
   //alignItems: 'center',
   backgroundColor: '#F5FCFF',
-}
+},
+modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+innerContainer: {
+  alignItems: 'center',
+},
+innerContainerScroll: {
+  height: 200,
+  padding: 20,
+},
 });
