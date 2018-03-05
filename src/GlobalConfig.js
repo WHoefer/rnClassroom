@@ -23,6 +23,16 @@ export const BORDERRADIUS = emSize.EMROUND(1);
 export const TEXTTCOLOR = '#000000';
 
 export const styles = {
+  infoTextHeader: {
+    fontSize: emSize.EM(1.4),
+    fontStyle: 'normal',
+    fontWeight: 'normal',
+  },
+  infoText: {
+    fontSize: emSize.EM(1.2),
+    fontStyle: 'normal',
+    fontWeight: 'normal',
+  },
   page: {
     backgroundColor: BACKGROUND,
   },
@@ -125,16 +135,25 @@ export const styles = {
     marginBottom:  emSize.EMROUND(1.0),
     marginHorizontal :PLR,
   },
+  playerButton: {
+    paddingTop: emSize.EMROUND(1),
+    paddingBottom: emSize.EMROUND(1),
+    borderRadius: BORDERRADIUS,
+    paddingLeft: PLR,
+    paddingRight: PLR,
+  },
   playerAudioText: {
     fontSize: emSize.EM(1.2),
     fontStyle: 'normal',
     fontWeight: 'normal',
     color: '#FFFFFF',
-    paddingTop: emSize.EMROUND(1),
-    paddingBottom: emSize.EMROUND(1),
-    //borderRadius: BORDERRADIUS,
-    paddingLeft: PLR,
-    paddingRight: PLR,
   },
+  playerImage: {
+    width: WIDTH,
+    aspectRatio: 4/3,
+    //marginHorizontal :PLR,
+    paddingBottom:  emSize.EMROUND(0),
+  },
+
 
 };

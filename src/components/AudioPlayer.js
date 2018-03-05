@@ -10,8 +10,11 @@ import { getAudioUris } from './../FileSystem';
 import Sound from 'react-native-sound';
 import { styles, BACKGROUND, MENUCOLOR, TEXTTCOLOR } from './../GlobalConfig';
 import { emSize } from './../util/EMSize';
+import { FormatedText } from './FormatedText';
 
-
+const PLAY = 1;
+const PAUSE = 2;
+const STOP = 3;
 export default class Page extends React.Component {
   constructor(props) {
       super(props);
@@ -21,7 +24,8 @@ export default class Page extends React.Component {
         sequence: this.props.sequence,
         soundArray:[],
         loaded: false,
-        play: false,
+        play: STOP,
+        debug: this.props.debug === undefined ? false : this.props.debug,
       };
       this.player = null;
       this.sound1 = null;
@@ -29,23 +33,45 @@ export default class Page extends React.Component {
       this.soundSelect = 1;
       this.soundCount = 0;
       this.sound  = null;
+      this.text = null;
+      this.image = null;
       this.count = 0;
       this.maxCount = 0;
       this.uriArray = [];
+      this.subType = null;
+      this.textArray = [];
+      this.imageArray = [];
   }
 
   componentWillMount() {
     const soundArray = [];
     const { resource, sequence } = this.state;
-    getAudioUris(resource, sequence, (uriArray) => {
-      console.log('---> uriArray', uriArray );
-      this.sound1 = new Sound(uriArray[0].uri, '', (error) => {
-        this.errorHandlingSoundLoad(error, uriArray[0].uri, this.sound1);
-      });
+    getAudioUris(resource, sequence, (uriArray, subType) => {
+      this.state.debug ? console.log('---> uriArray', uriArray ) : null;
+      this.subType = subType;
+      this.state.debug ? console.log('---> subType', subType ) : null;
       this.uriArray = uriArray;
       this.maxCount = uriArray.length;
+      this.loadFirst();
       this.setState({loaded: true});
     });
+  }
+
+  loadFirst(){
+    this.releaseAll();
+    this.soundSelect = 1;
+    this.soundCount = 0;
+    this.sound  = null;
+    this.count = 0;
+    if(this.subType === 'textAndAudio'){
+      this.text = this.uriArray[0].text
+    } else if(this.subType === 'imageAndAudio') {
+      this.image = this.uriArray[0].image
+    }
+    this.sound1 = new Sound(this.uriArray[0].uri, '', (error) => {
+      this.errorHandlingSoundLoad(error, this.uriArray[0].uri, this.sound1);
+    });
+
   }
 
   loadNext(){
@@ -106,60 +132,74 @@ export default class Page extends React.Component {
       console.log(`--> Error: Die Sounddatei ${file} konnte nicht geladen werden.`);
       return;
     }
-    console.log(`--> Load Success: duration = ${sound.getDuration()} uri = ${file}`);
+    this.state.debug ? console.log(`--> Load Success: duration = ${sound.getDuration()} uri = ${file}`) : null;
   }
 
   playAll(count){
-    //console.log(`--->Play: count = ${count} maxCount = ${this.maxCount}`);
-    //console.log(`--->Play: Sound1 = ${this.sound1} Sound2 = ${this.sound2}`);
-    //const { maxCount, soundArray } = this.state;
     if(count < this.maxCount){
-      this.setState({ play: true });
+      if(this.subType == "textAndAudio"){
+        this.text = this.uriArray[count].text;
+      } else if(this.subType === 'imageAndAudio') {
+        this.image = this.uriArray[count].image
+      }
+      this.setState({ play: PLAY });
       this.sound = this.recentSound();
-      console.log(`-->Play: ${this.uriArray[count].uri}`);
-      this.sound.play((onEnd) => {
-        if(onEnd){
-          console.log(`-->Beendet: ${(count+1)}/${this.maxCount}`);
-          this.playAll(this.soundCount);
-        } else {
-          console.log(`--> Fehler: ${(count+1)}/${this.maxCount}`);
-          this.setState({ play: false });
-        }
-      });
+      this.state.debug ? console.log(`-->Play: ${this.uriArray[count].uri}`) : null;
+      this.play(count);
       this.releasePrevious();
       this.switchNext();
       this.soundCount++;
       this.loadNext();
     }else{
-      //this.soundCount = 0;
-      //this.soundSelect = 1;
-      //this.loadNext();
-      this.setState({play: false});
+      this.loadFirst();
+      this.setState({play: STOP});
     }
     return;
   }
 
+  play(count){
+    this.sound.play((onEnd) => {
+      if(onEnd){
+        this.state.debug ? console.log(`-->Beendet: ${(count+1)}/${this.maxCount}`) : null;
+        this.playAll(this.soundCount);
+      } else {
+        this.state.debug ? console.log(`--> Fehler: ${(count+1)}/${this.maxCount}`) : null;
+        this.setState({ play: STOP });
+      }
+    });
+  }
+
   pauseAll(){
-    console.log('--->PAUSE: count = ', this.soundCount);
+    this.state.debug ? console.log('--->PAUSE: count = ', this.soundCount-1) : null;
     this.sound.pause();
-    this.setState({ play: false});
+    this.setState({ play: PAUSE});
+    return;
+  }
+
+  resume(){
+    this.state.debug ? console.log('--->RESUME: count = ', this.soundCount-1) : null;
+    this.play(this.soundCount);
+    this.setState({ play: PLAY});
     return;
   }
 
   stopAll(){
-    const {count, soundArray } = this.state;
-    for (var i = 0; i < soundArray.length; i++) {
-      soundArray[i].stop();
+    this.state.debug ? console.log('--->Stop') : null;
+    if(this.sound !== null){
+      this.sound.stop();
     }
-    this.setState({ count: 0});
+    this.loadFirst();
+    this.setState({ play: STOP, count: 0});
     return;
   }
 
 
   releaseAll(){
-    const {count, soundArray } = this.state;
-    for (var i = 0; i < soundArray.length; i++) {
-      soundArray[i].release();
+    if(this.sound1 !== null){
+      this.sound1.release();
+    }
+    if(this.sound2 !== null){
+      this.sound2.release();
     }
     this.setState({ count: 0});
     return;
@@ -168,7 +208,7 @@ export default class Page extends React.Component {
   renderButton(id, name, onPress){
     //console.log('--Button id: ', (id+name));
     return(
-      <TouchableHighlight key={id+name} onPress={ () => { onPress()}}>
+      <TouchableHighlight key={id+name} onPress={ () => { onPress()}} style={styles.playerButton}>
         <Text key={id+name+'text'} style={styles.playerAudioText} >
           {name}
         </Text>
@@ -178,11 +218,45 @@ export default class Page extends React.Component {
 
  renderPlayPause(id){
    const { play } = this.state;
-   if(!play){
-     return this.renderButton(id, 'START', () => {this.playAll(this.soundCount);})
+   if(play === PAUSE) {
+      return this.renderButton(id, 'PLAY', () => {this.resume();})
+   } else if( play === STOP){
+     return this.renderButton(id, 'PLAY', () => {this.playAll(this.soundCount);})
    }
    return this.renderButton(id, 'PAUSE', () => {this.pauseAll(this.soundCount);})
 
+ }
+
+ renderImage(key, obj, style){
+   const { resource } = this.state;
+   return (
+     <View key={key+obj.type} style={{flex: 1}}>
+      <Image source={getImageUri(resource, obj.content)} style={style} resizeMode="contain" borderRadius={emSize.EMROUND(1)} />
+     </View>
+   );
+ }
+
+ renderText(key, text, image){
+   if(  this.subType != null && this.subType === 'textAndAudio') {
+    this.state.debug ? console.log('---> Text anzeigen') : null;
+    return (FormatedText(key, text, styles.pageText, styles.pageTextFormated));
+  } else if(  this.subType != null &&   this.subType === 'imageAndAudio') {
+    this.state.debug ? console.log('---> Bild anzeigen', image) : null;
+    return (
+        <Image
+          source={image}
+          resizeMode="contain"
+          style={styles.playerImage}
+          borderBottomLeftRadius={20}
+          borderBottomRightRadius={20}
+          borderTopLeftRadius={emSize.EMROUND(1)}
+          borderTopRightRadius={emSize.EMROUND(1)}
+         />
+    );
+  } else {
+    console.log('---> Keine anzeige');
+    return (<View></View>);
+  }
  }
 
   renderPlayer(){
@@ -191,10 +265,11 @@ export default class Page extends React.Component {
       styles.playerAudio, {
         flexDirection: 'column',
         justifyContent: 'flex-start',
-        borderWidth: 1,
+        //borderWidth: 1,
         borderRadius: 20,
         backgroundColor: BACKGROUND,
-        borderColor: MENUCOLOR }
+        //borderColor: MENUCOLOR
+      }
     ];
     const infoTextStyle = [
       styles.playerAudioText,
@@ -207,14 +282,16 @@ export default class Page extends React.Component {
       justifyContent: 'space-between',
       borderWidth: 1,
       borderRadius: 20,
+      borderBottomLeftRadius: 20,
+      borderBottomRightRadius: 20,
       backgroundColor: MENUCOLOR,
     };
 
     return (
       <View key={id + 'container'} style={containerStyle}>
-        <Text key={id + 'Name'} style={infoTextStyle} >
-          {this.state.count}
-        </Text>
+        <View style={{flex: 1}}>
+          {this.renderText(id + 'Name', this.text, this.image)}
+        </View>
         <View key={id + 'Buttons'} style={buttonStyle}>
           {this.renderPlayPause(id)}
           {this.renderButton(id, 'STOP', () => {this.stopAll();})}

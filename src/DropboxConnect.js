@@ -104,7 +104,7 @@ export const getFileList = (accesstoken, path, responseHandler) => {
 *
 *
 *******************************************************************************/
-export const filesDownload = (log, accesstoken, indexSourcePathes, sourcePathes, targetPath, responseHandler) => {
+export const filesDownload = (log, accesstoken, indexSourcePathes, sourcePathes, targetPath, responseHandler, loadHandler) => {
  if(indexSourcePathes >= 0){
    const target = `${targetPath}${sourcePathes[indexSourcePathes]}`;
    RNFetchBlob.fs.exists(target).then((exist) => {
@@ -114,7 +114,8 @@ export const filesDownload = (log, accesstoken, indexSourcePathes, sourcePathes,
        copy = true;
      }
      if(copy){
-      logger(1, log, 'filesDownload',`Copy from DropBox ${sourcePathes[indexSourcePathes]} to local ${target}`);
+      //logger(1, log, 'filesDownload',`Copy from DropBox: \n${sourcePathes[indexSourcePathes]} \nto local \n${target}`, loadHandler);
+      logger(1, log, 'filesDownload',`Copy: ${target}`, loadHandler);
       //const dirs = RNFetchBlob.fs.dirs;
       const headers = {
         'Authorization': `Bearer ${accesstoken}`,
@@ -125,14 +126,15 @@ export const filesDownload = (log, accesstoken, indexSourcePathes, sourcePathes,
       }).fetch('POST', DROPBOX_URL_FILE_DOWNLOAD,headers).then((res) => {
         //progressHandler({content: res});
         --indexSourcePathes;
-        filesDownload(log, accesstoken, indexSourcePathes, sourcePathes, targetPath, responseHandler)
+        filesDownload(log, accesstoken, indexSourcePathes, sourcePathes, targetPath, responseHandler, loadHandler)
       }).catch((errorMessage, statusCode) => {
         responseHandler({statusCode: statusCode, errorMessage: errorMessage, content: null});
       });
     }else{ // if(!exist)
-      logger(1, log, 'filesDownload',`Exist in DropBox ${sourcePathes[indexSourcePathes]} and local ${target}. NO copy.`);
+      //logger(1, log, 'filesDownload',`Exist in DropBox: \n${sourcePathes[indexSourcePathes]} \nand local \n${target}. \nNO copy.`, loadHandler);
+      logger(1, log, 'filesDownload',`Exist: ${target}`, loadHandler);
       --indexSourcePathes;
-      filesDownload(log, accesstoken, indexSourcePathes, sourcePathes, targetPath, responseHandler)
+      filesDownload(log, accesstoken, indexSourcePathes, sourcePathes, targetPath, responseHandler, loadHandler)
     }
    }).catch(() => {
      responseHandler({
@@ -203,12 +205,12 @@ export const getFileDownload = (accesstoken, sourcPath, targePath, responseHandl
 * getJsonFilesContent an den responsetHandler übergeben.
 *
 *****************************************************************************/
-export const getFilesToCopy = (log, accesstoken, responseHandler) => {
+export const getFilesToCopy = (log, accesstoken, responseHandler, loadHandler) => {
   getJsonFileContent(accesstoken, '/bookshelf.json', (obj) => {
     if( obj.statusCode === 200 ){
-      logger(1, log, 'getJsonFileContent', 'bookshelf.json');
+      logger(1, log, 'getJsonFileContent', 'bookshelf.json', loadHandler);
       const bookShelf = obj.content;
-      loggerBookshelf(2, log, bookShelf);
+      loggerBookshelf(2, log, bookShelf, loadHandler);
       const pathes = [
         bookShelf.imagePath,
         bookShelf.audioPath,
@@ -223,8 +225,8 @@ export const getFilesToCopy = (log, accesstoken, responseHandler) => {
         let files = [];
         const resourcesArray = obj.responses;
         if( obj.statusCode === 200 ){
-          logger(1, log, 'getJsonFilesContent statusCode', obj.statusCode);
-          logger(1, log, 'getJsonFilesContent errorMessage', obj.errorMessage);
+          logger(1, log, 'getJsonFilesContent statusCode', obj.statusCode, loadHandler);
+          logger(1, log, 'getJsonFilesContent errorMessage', obj.errorMessage, loadHandler);
           files.push('/bookshelf.json');
           for (var i = 0; i < resourcesArray.length; i++) {
             files.push(`${resourcesArray[i].sourcePath}/resources.json`);
@@ -254,8 +256,8 @@ export const getFilesToCopy = (log, accesstoken, responseHandler) => {
 *
 *
 *****************************************************************************/
-export const updateLocal = (log, accesstoken, localPath, responseHandler) => {
-  logger(1, log, 'updateLocal', 'Start');
+export const updateLocal = (log, accesstoken, localPath, responseHandler, loadHandler) => {
+  logger(1, log, 'updateLocal', 'Start', loadHandler);
   getFilesToCopy(log, accesstoken, (obj) => {
     if( obj.statusCode === 200 ){
       const bookShelf = obj.responses.bookShelf;
@@ -263,24 +265,24 @@ export const updateLocal = (log, accesstoken, localPath, responseHandler) => {
       const files = obj.responses.files;
       const pathes = obj.responses.pathes;
       const index =  pathes.length-1;
-      logger(1, log, 'CreateDirs', 'Start');
+      logger(1, log, 'CreateDirs', 'Start', loadHandler);
       createDirs(index, pathes, localPath, (obj) => {
         if( obj.statusCode === 200 ){
           const index =  files.length-1;
-          logger(1, log, 'filesDownload', 'Start');
+          logger(1, log, 'filesDownload', 'Start', loadHandler);
           filesDownload(log, accesstoken, index, files, localPath, (obj) => {
             responseHandler(obj);
-          });
+          }, loadHandler);
         }else{
-          logger(3, log, 'error createDirs', ' ');
-          logger(3, log, 'response', JSON.stringify(obj));
+          logger(3, log, 'error createDirs', ' ', loadHandler);
+          logger(3, log, 'response', JSON.stringify(obj), loadHandler);
           responseHandler(obj);
         }
       }); // createDirs(index, pathes, (obj)
     } else {
-      logger(2, log, 'error getFilesToCopy');
-      logger(3, log, 'response from getFilesToCopy',JSON.stringify(obj));
+      logger(2, log, 'error getFilesToCopy', loadHandler);
+      logger(3, log, 'response from getFilesToCopy',JSON.stringify(obj), loadHandler);
       responseHandler(obj);
     }
-  }); // getFilesToCopy(accesstoken, (obj) => {
+  }, loadHandler); // getFilesToCopy(accesstoken, (obj) => {
 }

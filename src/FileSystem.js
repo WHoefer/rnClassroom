@@ -79,9 +79,15 @@ export const getAudioUris = (resource, key, responseHandler) => {
       for (var i = 0; i < data.length; i++) {
         let audioKey = data[i].audio;
         let uri = getAudioUri(resource, audioKey);
+        if(content.subType === 'textAndAudio' && data[i].text !== null ){
+           uri = {uri, text: data[i].text};
+        } else if(content.subType === 'imageAndAudio' && data[i].image !== null ){
+           let imageUri = getImageUri(resource, data[i].image);
+           uri = {uri, image: imageUri};
+        }
         uriArray.push(uri);
       }
-      responseHandler(uriArray);
+      responseHandler(uriArray, content.subType);
     }
   });
 }
