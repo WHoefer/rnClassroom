@@ -72,6 +72,7 @@ export const getVideoUri = (resource, key) => {
 
 export const getAudioUris = (resource, key, responseHandler) => {
   let uriArray = [];
+  let posArray = [];
   sequencePath = getSequencePath(resource, key);
   getLocalJsonFile(sequencePath, (content) => {
     if(content.type === 'SEQUENCE'){
@@ -85,9 +86,17 @@ export const getAudioUris = (resource, key, responseHandler) => {
            let imageUri = getImageUri(resource, data[i].image);
            uri = {uri, image: imageUri};
         }
+        try{
+          let pos = data[i].pos;
+          if(pos === "pos"){
+            posArray.push(i);
+          }
+        }catch(err){
+
+        }
         uriArray.push(uri);
       }
-      responseHandler(uriArray, content.subType);
+      responseHandler(uriArray, posArray, content.subType);
     }
   });
 }

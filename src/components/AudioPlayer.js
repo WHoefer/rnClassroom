@@ -25,7 +25,7 @@ export default class Page extends React.Component {
         soundArray:[],
         loaded: false,
         play: STOP,
-        debug: this.props.debug === undefined ? false : this.props.debug,
+        debug: this.props.debug === undefined ? true : this.props.debug,
       };
       this.player = null;
       this.sound1 = null;
@@ -38,6 +38,7 @@ export default class Page extends React.Component {
       this.count = 0;
       this.maxCount = 0;
       this.uriArray = [];
+      this.posArray = [];
       this.subType = null;
       this.textArray = [];
       this.imageArray = [];
@@ -46,9 +47,11 @@ export default class Page extends React.Component {
   componentWillMount() {
     const soundArray = [];
     const { resource, sequence } = this.state;
-    getAudioUris(resource, sequence, (uriArray, subType) => {
+    getAudioUris(resource, sequence, (uriArray, posArray, subType) => {
       this.state.debug ? console.log('---> uriArray', uriArray ) : null;
       this.subType = subType;
+      this.state.debug ? console.log('---> posArray', posArray ) : null;
+      this.posArray = posArray;
       this.state.debug ? console.log('---> subType', subType ) : null;
       this.uriArray = uriArray;
       this.maxCount = uriArray.length;
@@ -135,17 +138,17 @@ export default class Page extends React.Component {
     this.state.debug ? console.log(`--> Load Success: duration = ${sound.getDuration()} uri = ${file}`) : null;
   }
 
-  playAll(count){
-    if(count < this.maxCount){
+  playAll(){
+    if(this.soundCount < this.maxCount){
       if(this.subType == "textAndAudio"){
-        this.text = this.uriArray[count].text;
+        this.text = this.uriArray[this.soundCount].text;
       } else if(this.subType === 'imageAndAudio') {
-        this.image = this.uriArray[count].image
+        this.image = this.uriArray[this.soundCount].image
       }
       this.setState({ play: PLAY });
       this.sound = this.recentSound();
-      this.state.debug ? console.log(`-->Play: ${this.uriArray[count].uri}`) : null;
-      this.play(count);
+      this.state.debug ? console.log(`-->Play: ${this.uriArray[this.soundCount].uri}`) : null;
+      this.play();
       this.releasePrevious();
       this.switchNext();
       this.soundCount++;
@@ -157,13 +160,13 @@ export default class Page extends React.Component {
     return;
   }
 
-  play(count){
+  play(){
     this.sound.play((onEnd) => {
       if(onEnd){
-        this.state.debug ? console.log(`-->Beendet: ${(count+1)}/${this.maxCount}`) : null;
+        this.state.debug ? console.log(`-->Beendet: ${(this.soundCount+1)}/${this.maxCount}`) : null;
         this.playAll(this.soundCount);
       } else {
-        this.state.debug ? console.log(`--> Fehler: ${(count+1)}/${this.maxCount}`) : null;
+        this.state.debug ? console.log(`--> Fehler: ${(this.soundCount+1)}/${this.maxCount}`) : null;
         this.setState({ play: STOP });
       }
     });
@@ -178,7 +181,7 @@ export default class Page extends React.Component {
 
   resume(){
     this.state.debug ? console.log('--->RESUME: count = ', this.soundCount-1) : null;
-    this.play(this.soundCount);
+    this.play();
     this.setState({ play: PLAY});
     return;
   }

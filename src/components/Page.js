@@ -12,7 +12,6 @@ import {
   getImageUri,
   getVideoUri,
   getAudioUri,
-  getAudioUris,
   getSequencePath,
 } from './../FileSystem';
 import Video from 'react-native-video';
