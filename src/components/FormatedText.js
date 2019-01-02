@@ -51,7 +51,7 @@ export const FormatedText= (key, text, style, styleFormat) => {
     }
     startPos = endPos;
     pattern = str.substring(endPos-4, endPos);
-    console.log('RES: ', res);
+    //console.log('RES: ', res);
     out = res[0];
     out = out.substring(3, out.length-4);
     if(boldPatt === pattern){

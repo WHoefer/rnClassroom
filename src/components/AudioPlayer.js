@@ -6,16 +6,25 @@ import {
   TouchableHighlight,
   Image,
 } from 'react-native';
-import { getAudioUris } from './../FileSystem';
+import { getAudioPlayerData } from './../FileSystem';
 import Sound from 'react-native-sound';
 import { styles, BACKGROUND, MENUCOLOR, TEXTTCOLOR } from './../GlobalConfig';
 import { emSize } from './../util/EMSize';
 import { FormatedText } from './FormatedText';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 
 const PLAY = 1;
 const PAUSE = 2;
 const STOP = 3;
-export default class Page extends React.Component {
+
+const  PLAY_ICON = "play-arrow";
+const  PAUSE_ICON = "pause";
+const  STOP_ICON = "stop";
+const  NEXT_ICON = "skip-next";
+const  PREVIOUS_ICON = "skip-previous";
+
+export default class AudioPlayer extends React.Component {
   constructor(props) {
       super(props);
       this.state = {
@@ -35,7 +44,6 @@ export default class Page extends React.Component {
       this.sound  = null;
       this.text = null;
       this.image = null;
-      this.count = 0;
       this.maxCount = 0;
       this.uriArray = [];
       this.posArray = [];
@@ -44,48 +52,135 @@ export default class Page extends React.Component {
       this.imageArray = [];
   }
 
-  componentWillMount() {
+  async componentWillMount() {
     const soundArray = [];
     const { resource, sequence } = this.state;
-    getAudioUris(resource, sequence, (uriArray, posArray, subType) => {
-      this.state.debug ? console.log('---> uriArray', uriArray ) : null;
-      this.subType = subType;
-      this.state.debug ? console.log('---> posArray', posArray ) : null;
-      this.posArray = posArray;
-      this.state.debug ? console.log('---> subType', subType ) : null;
-      this.uriArray = uriArray;
-      this.maxCount = uriArray.length;
-      this.loadFirst();
-      this.setState({loaded: true});
-    });
+    const data = await getAudioPlayerData(resource, sequence);
+    this.state.debug ? console.log('---> uriArray', data.uriArray ) : null;
+    this.subType = data.subType;
+    this.state.debug ? console.log('---> posArray', data.posArray ) : null;
+    this.posArray = data.posArray;
+    this.state.debug ? console.log('---> subType', data.subType ) : null;
+    this.uriArray = data.uriArray;
+    this.maxCount = data.uriArray.length;
+    this.loadFirst();
+    this.setState({loaded: true});
   }
 
   loadFirst(){
+    try {
+      this.releaseAll();
+      this.soundSelect = 1;
+      this.soundCount = 0;
+      this.sound  = null;
+      if(this.subType === 'textAndAudio'){
+        this.text = this.getText();
+      } else if(this.subType === 'imageAndAudio') {
+        this.image = this.getImage();
+      }
+      this.sound1 = new Sound(this.getAudioPath(), '', (error) => {
+        this.errorHandlingSoundLoad(error, this.getAudioPath(), this.sound1);
+      });
+    } catch(err) {
+      console.log('---> Error loadFirst', err);
+    }
+  }
+
+  setFlipbook() {
+    if(this.subType === 'textAndAudio'){
+      this.text = this.getText();
+    } else if(this.subType === 'imageAndAudio') {
+      this.image = this.getImage();
+    }
+  }
+
+  getAudioPath() {
+    if (this.soundCount < this.maxCount) {
+      return this.uriArray[this.soundCount].uri.uri;
+    } else {
+      console.log(`Error getAudioPath:  soundCount = ${this.soundCount}  but max Index is ${this.maxCount - 1}`);
+      return this.uriArray[this.maxCount - 1].uri.uri;
+    }
+
+  }
+
+  getText() {
+    if (this.soundCount < this.maxCount) {
+      return this.uriArray[this.soundCount].text;
+    } else {
+      console.log(`Error getText:  soundCount = ${this.soundCount}  but max Index is ${this.maxCount - 1}`);
+      return this.uriArray[this.maxCount - 1].text;
+    }
+  }
+
+  getImage() {
+    if (this.soundCount < this.maxCount) {
+      return this.uriArray[this.soundCount].image;
+    } else {
+      console.log(`Error getText:  soundCount = ${this.soundCount}  but max Index is ${this.maxCount - 1}`);
+      return this.uriArray[this.maxCount - 1].image;
+    }
+  }
+
+
+  playbackNextPos(){
+    if(this.sound !== null){
+      this.sound.stop();
+    }
     this.releaseAll();
     this.soundSelect = 1;
-    this.soundCount = 0;
-    this.sound  = null;
-    this.count = 0;
-    if(this.subType === 'textAndAudio'){
-      this.text = this.uriArray[0].text
-    } else if(this.subType === 'imageAndAudio') {
-      this.image = this.uriArray[0].image
+    this.posArray
+    for (var i = 0; i < this.posArray.length; i++) {
+      const pos =  this.posArray[i];
+      if (this.soundCount <= pos) {
+        this.soundCount = pos;
+        break;
+      }
     }
-    this.sound1 = new Sound(this.uriArray[0].uri, '', (error) => {
-      this.errorHandlingSoundLoad(error, this.uriArray[0].uri, this.sound1);
+    this.sound  = null;
+    this.setFlipbook();
+    this.sound1 = new Sound(this.getAudioPath(), '', (error) => {
+      this.errorHandlingSoundLoad(error, this.getAudioPath(), this.sound1);
+      if(error === null){
+        this.playAll();
+      }
     });
+  }
 
+  playbackPrevPos(){
+    if(this.sound !== null){
+      this.sound.stop();
+    }
+    this.releaseAll();
+    this.soundSelect = 1;
+    this.posArray;
+    for (var i = this.posArray.length - 1; i >= 0; i--) {
+      const pos =  this.posArray[i];
+      const prevPos =  i > 0 ? this.posArray[i-1] : this.posArray[0] ;
+      if (this.soundCount >= pos) {
+        this.soundCount = prevPos;
+        break;
+      }
+    }
+    this.sound  = null;
+    this.setFlipbook();
+    this.sound1 = new Sound(this.getAudioPath(), '', (error) => {
+      this.errorHandlingSoundLoad(error, this.getAudioPath(), this.sound1);
+      if(error === null){
+        this.playAll();
+      }
+    });
   }
 
   loadNext(){
     if(this.soundCount < this.maxCount){
       if(this.soundSelect === 1){
-        this.sound1 = new Sound(this.uriArray[this.soundCount].uri, '', (error) => {
-          this.errorHandlingSoundLoad(error, this.uriArray[this.soundCount].uri, this.sound2 );
+        this.sound1 = new Sound(this.getAudioPath(), '', (error) => {
+          this.errorHandlingSoundLoad(error, this.getAudioPath(), this.sound2 );
         });
       } else {
-        this.sound2 = new Sound(this.uriArray[this.soundCount].uri, '', (error) => {
-        this.errorHandlingSoundLoad(error, this.uriArray[this.soundCount].uri, this.sound1 );
+        this.sound2 = new Sound(this.getAudioPath(), '', (error) => {
+        this.errorHandlingSoundLoad(error, this.getAudioPath(), this.sound1 );
         });
       }
     }
@@ -94,32 +189,26 @@ export default class Page extends React.Component {
   switchNext(){
     if(this.soundSelect === 1){
       this.soundSelect = 2;
-      //console.log('---->switcht to sound 2');
     } else {
       this.soundSelect = 1;
-      //console.log('---->switcht to sound 1');
     }
   }
 
-
-  recentSound(){
+  setRecentSoundInstance(){
     if(this.soundSelect === 1){
-      //console.log(`----recentSound return 1 ${this.sound1}`);
-      return this.sound1;
+      this.sound = this.sound1;
+    } else {
+      this.sound = this.sound2;
     }
-    //console.log(`----recentSound return 2 ${this.sound2}`);
-    return this.sound2;
   }
 
   releasePrevious(){
     if(this.soundSelect === 1){
       if(this.sound2 !== null){
-        //console.log('---> release sound2');
         this.sound2.release();
       }
     } else {
       if(this.sound1 !== null){
-        //console.log('---> release sound1');
         this.sound1.release();
       }
     }
@@ -135,38 +224,36 @@ export default class Page extends React.Component {
       console.log(`--> Error: Die Sounddatei ${file} konnte nicht geladen werden.`);
       return;
     }
-    this.state.debug ? console.log(`--> Load Success: duration = ${sound.getDuration()} uri = ${file}`) : null;
+    this.debugLoad(sound, file);
   }
 
   playAll(){
-    if(this.soundCount < this.maxCount){
-      if(this.subType == "textAndAudio"){
-        this.text = this.uriArray[this.soundCount].text;
-      } else if(this.subType === 'imageAndAudio') {
-        this.image = this.uriArray[this.soundCount].image
+    try {
+      if(this.soundCount < this.maxCount){
+        this.setFlipbook();
+        this.setState({ play: PLAY });
+        this.setRecentSoundInstance();
+        this.play();
+        this.releasePrevious();
+        this.switchNext();
+        this.soundCount++;
+        this.loadNext();
+      }else{
+        this.loadFirst();
+        this.setState({play: STOP});
       }
-      this.setState({ play: PLAY });
-      this.sound = this.recentSound();
-      this.state.debug ? console.log(`-->Play: ${this.uriArray[this.soundCount].uri}`) : null;
-      this.play();
-      this.releasePrevious();
-      this.switchNext();
-      this.soundCount++;
-      this.loadNext();
-    }else{
-      this.loadFirst();
-      this.setState({play: STOP});
+      return;
+    } catch(err) {
+      console.log('----> Error in playAll:',err);
     }
-    return;
   }
 
   play(){
+    this.debugPlay();
     this.sound.play((onEnd) => {
       if(onEnd){
-        this.state.debug ? console.log(`-->Beendet: ${(this.soundCount+1)}/${this.maxCount}`) : null;
-        this.playAll(this.soundCount);
+        this.playAll();
       } else {
-        this.state.debug ? console.log(`--> Fehler: ${(this.soundCount+1)}/${this.maxCount}`) : null;
         this.setState({ play: STOP });
       }
     });
@@ -209,12 +296,13 @@ export default class Page extends React.Component {
   }
 
   renderButton(id, name, onPress){
-    //console.log('--Button id: ', (id+name));
     return(
-      <TouchableHighlight key={id+name} onPress={ () => { onPress()}} style={styles.playerButton}>
-        <Text key={id+name+'text'} style={styles.playerAudioText} >
-          {name}
-        </Text>
+      <TouchableHighlight
+        key={id+name}
+        onPress={ () => { onPress()}}
+        style={styles.playerButton}
+        underlayColor={styles.playerButtonUnderlay.underlayColor}>
+        <Icon name={name} size={styles.playerIcon.size} color={styles.playerIcon.color} />
       </TouchableHighlight>
     );
   }
@@ -222,11 +310,11 @@ export default class Page extends React.Component {
  renderPlayPause(id){
    const { play } = this.state;
    if(play === PAUSE) {
-      return this.renderButton(id, 'PLAY', () => {this.resume();})
+      return this.renderButton(id, PLAY_ICON, () => {this.resume();})
    } else if( play === STOP){
-     return this.renderButton(id, 'PLAY', () => {this.playAll(this.soundCount);})
+     return this.renderButton(id, PLAY_ICON, () => {this.playAll();})
    }
-   return this.renderButton(id, 'PAUSE', () => {this.pauseAll(this.soundCount);})
+   return this.renderButton(id, PAUSE_ICON, () => {this.pauseAll();})
 
  }
 
@@ -239,12 +327,10 @@ export default class Page extends React.Component {
    );
  }
 
- renderText(key, text, image){
+ renderFlipbook(key, text, image){
    if(  this.subType != null && this.subType === 'textAndAudio') {
-    this.state.debug ? console.log('---> Text anzeigen') : null;
-    return (FormatedText(key, text, styles.pageText, styles.pageTextFormated));
+    return (FormatedText(key, text, styles.playerText, styles.playerTextFormated));
   } else if(  this.subType != null &&   this.subType === 'imageAndAudio') {
-    this.state.debug ? console.log('---> Bild anzeigen', image) : null;
     return (
         <Image
           source={image}
@@ -265,13 +351,10 @@ export default class Page extends React.Component {
   renderPlayer(){
     const { id } = this.state;
     const containerStyle = [
-      styles.playerAudio, {
+      styles.playerContainer, {
         flexDirection: 'column',
         justifyContent: 'flex-start',
-        //borderWidth: 1,
-        borderRadius: 20,
-        backgroundColor: BACKGROUND,
-        //borderColor: MENUCOLOR
+        flex: 1,
       }
     ];
     const infoTextStyle = [
@@ -280,24 +363,24 @@ export default class Page extends React.Component {
         color: TEXTTCOLOR,
       }
     ];
-    const buttonStyle = {
+    const buttonContainer = [
+      styles.playerButtonContainer,
+      {
       flexDirection: 'row',
-      justifyContent: 'space-between',
-      borderWidth: 1,
-      borderRadius: 20,
-      borderBottomLeftRadius: 20,
-      borderBottomRightRadius: 20,
-      backgroundColor: MENUCOLOR,
-    };
+      justifyContent: 'space-around',
+      flex: 1
+    }];
 
     return (
       <View key={id + 'container'} style={containerStyle}>
         <View style={{flex: 1}}>
-          {this.renderText(id + 'Name', this.text, this.image)}
+          {this.renderFlipbook(id + 'Name', this.text, this.image)}
         </View>
-        <View key={id + 'Buttons'} style={buttonStyle}>
+        <View key={id + 'Buttons'} style={buttonContainer}>
           {this.renderPlayPause(id)}
-          {this.renderButton(id, 'STOP', () => {this.stopAll();})}
+          {this.renderButton(id, PREVIOUS_ICON, () => {this.playbackPrevPos()})}
+          {this.renderButton(id, NEXT_ICON, () => {this.playbackNextPos()})}
+          {this.renderButton(id, STOP_ICON, () => {this.stopAll();})}
         </View>
       </View>
     );
@@ -321,5 +404,24 @@ export default class Page extends React.Component {
     return(this.renderInfo());
    }
 
+  debugPlay(){
+    try {
+      if (this.state.debug) {
+        console.log(`-->Start Playback: file = ${this.getAudioPath().match(/\/[0-9.a-zA-Z_]+\.mp3/gm)} pos = ${(this.soundCount+1)}/${this.maxCount}`);
+      }
+    } catch(err) {
+
+    }
+  }
+
+  debugLoad(sound, file){
+    try {
+      if (this.state.debug) {
+        console.log(`-->  Load Success: file = ${file.match(/\/[0-9.a-zA-Z_]+\.mp3/gm)} duration = ${sound.getDuration()}`);
+      }
+    } catch(err) {
+
+    }
+  }
 
 }

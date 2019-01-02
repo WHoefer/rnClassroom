@@ -70,35 +70,36 @@ export const getVideoUri = (resource, key) => {
     return {'uri': `file://${getVideoPath(resource, key)}`};
 }
 
-export const getAudioUris = (resource, key, responseHandler) => {
+export const getAudioPlayerData = async (resource, key) => {
   let uriArray = [];
   let posArray = [];
   sequencePath = getSequencePath(resource, key);
-  getLocalJsonFile(sequencePath, (content) => {
-    if(content.type === 'SEQUENCE'){
-      const data = content.data;
-      for (var i = 0; i < data.length; i++) {
-        let audioKey = data[i].audio;
-        let uri = getAudioUri(resource, audioKey);
-        if(content.subType === 'textAndAudio' && data[i].text !== null ){
-           uri = {uri, text: data[i].text};
-        } else if(content.subType === 'imageAndAudio' && data[i].image !== null ){
-           let imageUri = getImageUri(resource, data[i].image);
-           uri = {uri, image: imageUri};
-        }
-        try{
-          let pos = data[i].pos;
-          if(pos === "pos"){
-            posArray.push(i);
-          }
-        }catch(err){
-
-        }
-        uriArray.push(uri);
+  const content = await getLocalJson(sequencePath);
+  if(content.type === 'SEQUENCE'){
+    const data = content.data;
+    for (var i = 0; i < data.length; i++) {
+      let audioKey = data[i].audio;
+      let uri = getAudioUri(resource, audioKey);
+      if(content.subType === 'textAndAudio' && data[i].text !== null ){
+         uri = {uri, text: data[i].text};
+      } else if(content.subType === 'imageAndAudio' && data[i].image !== null ){
+         let imageUri = getImageUri(resource, data[i].image);
+         uri = {uri, image: imageUri};
+      } else {
+        uri = {uri};
       }
-      responseHandler(uriArray, posArray, content.subType);
+      try{
+        let pos = data[i].pos;
+        if(pos === "pos"){
+          posArray.push(i);
+        }
+      }catch(err){
+
+      }
+      uriArray.push(uri);
     }
-  });
+    return { uriArray, posArray, type: content.type, subType: content.subType };
+  }
 }
 
 const getAssociativeArray = (log, obj, array, path) => {
@@ -201,6 +202,15 @@ export const getLocalJsonFile = (path, responseHandler) => {
     const content = JSON.parse(data);
     responseHandler(content);
   });
+}
+/*******************************************************************************
+*
+*
+*******************************************************************************/
+export const getLocalJson = async (path) => {
+  const data = await RNFetchBlob.fs.readFile(path, 'utf8');
+  const content = JSON.parse(data);
+  return content;
 }
 /*******************************************************************************
 * Gibt das files-Object mit der folgenden Struktur zurück:

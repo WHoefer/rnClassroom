@@ -6,12 +6,15 @@ import {
   ScrollView,
   Image,
   TouchableHighlight,
+  StatusBar,
 } from 'react-native';
+import { styles } from './../GlobalConfig';
 
 export const Menu = (props) => {
     return (
       <View style={{flex: 1}} >
-      	<View style={{flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'red', height: 40}} >
+      <StatusBar barStyle = "dark-content" hidden = {false} backgroundColor = {styles.statusBar.backgroundColor} translucent = {false}/>
+      	<View style={{flexDirection: 'row', justifyContent: 'space-between', backgroundColor: styles.menue.backgroundColor, height: styles.menue.height}} >
           <TouchableHighlight
             onPress={props.onPressBack}
             underlayColor='white'

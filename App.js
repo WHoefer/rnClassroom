@@ -106,11 +106,12 @@ const listOutput = (liste) => {
 export default class App extends Component<{}> {
   constructor(props) {
   super(props);
+  const PATH = RNFetchBlob.fs.dirs.DownloadDir;
 
   this.state = {
-      localPath: RNFetchBlob.fs.dirs.DocumentDir+'/Test',
-      localPathImages: RNFetchBlob.fs.dirs.DocumentDir+ '/Test/images',
-      localPathBookshelf: RNFetchBlob.fs.dirs.DocumentDir+ '/Test/bookshelf.json',
+      localPath: PATH +'/Test',
+      localPathImages: PATH + '/Test/images',
+      localPathBookshelf: PATH + '/Test/bookshelf.json',
       pos: 0,
       listLoaded: false,
       fileList: null,
