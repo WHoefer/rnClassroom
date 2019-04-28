@@ -5,6 +5,7 @@ import {
   View,
   TouchableHighlight
 } from 'react-native';
+import { styles, BACKGROUND, MENUCOLOR, TEXTTCOLOR } from './../GlobalConfig';
 
 
 export default class Chapter extends React.Component {
@@ -26,11 +27,16 @@ export default class Chapter extends React.Component {
         key={key}
         onPress={() => { this.props.onPress(Content); }}
       >
-        <View style={{flex: 1, flexDirection: 'column', borderWidth: 1}}>
-          <Text>
+        <View style={{
+          flex: 1,
+          flexDirection: 'column',
+          borderWidth: 1,
+          borderColor: styles.chapter.borderColor,  
+          backgroundColor: styles.chapter.backgroundColor}}>
+          <Text style={styles.chapterMain}>
             {MainTitle}
           </Text>
-          <Text>
+          <Text style={styles.chapterSub}>
             {SubTitle}
           </Text>
         </View>

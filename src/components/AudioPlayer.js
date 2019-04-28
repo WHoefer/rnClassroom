@@ -176,11 +176,11 @@ export default class AudioPlayer extends React.Component {
     if(this.soundCount < this.maxCount){
       if(this.soundSelect === 1){
         this.sound1 = new Sound(this.getAudioPath(), '', (error) => {
-          this.errorHandlingSoundLoad(error, this.getAudioPath(), this.sound2 );
+          this.errorHandlingSoundLoad(error, this.getAudioPath(), this.sound1 );
         });
       } else {
         this.sound2 = new Sound(this.getAudioPath(), '', (error) => {
-        this.errorHandlingSoundLoad(error, this.getAudioPath(), this.sound1 );
+        this.errorHandlingSoundLoad(error, this.getAudioPath(), this.sound2 );
         });
       }
     }
@@ -368,6 +368,7 @@ export default class AudioPlayer extends React.Component {
       {
       flexDirection: 'row',
       justifyContent: 'space-around',
+      alignItems: 'center',
       flex: 1
     }];
 

@@ -9,26 +9,34 @@ import {
   StatusBar,
 } from 'react-native';
 import { styles } from './../GlobalConfig';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export const Menu = (props) => {
     return (
       <View style={{flex: 1}} >
       <StatusBar barStyle = "dark-content" hidden = {false} backgroundColor = {styles.statusBar.backgroundColor} translucent = {false}/>
-      	<View style={{flexDirection: 'row', justifyContent: 'space-between', backgroundColor: styles.menue.backgroundColor, height: styles.menue.height}} >
+      	<View style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          backgroundColor: styles.menue.backgroundColor,
+          height: styles.menue.height,
+          padding : styles.menue.padding}} >
+
           <TouchableHighlight
             onPress={props.onPressBack}
             underlayColor='white'
             activeOpacity={1}
           >
-            <Text style={{padding: 10, color: 'white'}}>zurück</Text>
+            <Icon name={'arrow-back'} size={styles.menue.height/2} color={styles.menue.color} />
           </TouchableHighlight>
-          <Text style={{padding: 10, color: 'white'}}>Yoga</Text>
+          <Text style={styles.menueText}>YogaBase</Text>
           <TouchableHighlight
             onPress={props.onPressDownload}
             underlayColor='white'
             activeOpacity={1}
           >
-            <Text style={{padding: 10, color: 'white'}}>download</Text>
+            <Icon name={'cloud-download'} size={styles.menue.height/2} color={styles.menue.color} />
           </TouchableHighlight>
         </View>
         {props.children}

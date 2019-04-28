@@ -22,7 +22,7 @@ export const MENUCOLOR = 'green';
 export const BORDERRADIUS = emSize.EMROUND(1);
 export const TEXTTCOLOR = '#000000';
 
-// Android Color Palette Light green
+// Android Color Palette Light green Primary
 const _50 = '#F1F8E9';
 const _100 = '#DCEDC8';
 const _200 = '#C5E1A5';
@@ -40,13 +40,38 @@ const A700 = '#64DD17';
 const BLACK = '#000000';
 const WHITE = '#FFFFFF';
 
+// Android Color Palette Orange Secondary
+const s50 = '#FFFDE7';
+const s100 = '#FFF9C4';
+const s200 = '#FFF59D';
+const s300 = '#FFF176';
+const s400 = '#FFEE58';
+const s500 = '#FFEB3B';
+const s600 = '#FDD835';
+const s700 = '#FBC02D';
+const s800 = '#F9A825';
+const s900 = '#F57F17';
+const sA100 = '#FFFF8D';
+const sA200 = '#FFFF00';
+const sA400 = '#FFEA00';
+const sA700 = '#FFD600';
+
+
+
+
 
 
 export const THEMES_PLAYER_PRESS = A700;
-export const THEMES_PLAYER_BUTTON = WHITE;
+export const THEMES_PLAYER_BUTTON = BLACK;
 export const THEMES_PLAYER_BACKGROUND = _800;
 export const THEMES_PLAYER_BORDER = _900;
 export const THEMES_MENUE_BACKGROUND = _900;
+export const THEMES_MENUE_COLOR =WHITE;
+export const THEMES_PAGE_BACKGROUND = _50;
+export const THEMES_LIST_BACKGROUND = _100;
+export const THEMES_LIST_BORDERCOLOR = _300;
+export const THEMES_LIST_MAIN_COLOR = BLACK;
+export const THEMES_LIST_SUB_COLOR = _900;
 export const THEMES_STATUSBAR_BACKGROUND = _800;
 
 export const styles = {
@@ -55,7 +80,36 @@ export const styles = {
   },
   menue: {
     backgroundColor: THEMES_MENUE_BACKGROUND,
-    height: 40
+    color: THEMES_MENUE_COLOR,
+    height: 60,
+    padding: 20,
+  },
+  menueText: {
+    color: THEMES_MENUE_COLOR,
+    fontSize: emSize.EM(1.6),
+    fontStyle: 'italic',
+    fontWeight: 'normal',
+    textAlign: 'center',
+  },
+  chapter: {
+    backgroundColor: THEMES_LIST_BACKGROUND,
+    borderColor: THEMES_LIST_BORDERCOLOR,
+  },
+  chapterMain: {
+    color: THEMES_LIST_MAIN_COLOR,
+    fontSize: emSize.EM(1.8),
+    padding: 10,
+    fontStyle: 'normal',
+    fontWeight: 'normal',
+    textAlign: 'center',
+  },
+  chapterSub: {
+    color: THEMES_LIST_SUB_COLOR,
+    fontSize: emSize.EM(1.0),
+    padding: 10,
+    fontStyle: 'normal',
+    fontWeight: 'normal',
+    textAlign: 'center',
   },
   infoTextHeader: {
     fontSize: emSize.EM(1.4),
@@ -68,7 +122,7 @@ export const styles = {
     fontWeight: 'normal',
   },
   page: {
-    backgroundColor: BACKGROUND,
+    backgroundColor: THEMES_PAGE_BACKGROUND,
   },
   pageText: {
     fontSize: emSize.EM(1.2),
@@ -178,13 +232,14 @@ export const styles = {
     backgroundColor: THEMES_PLAYER_BACKGROUND,
     borderBottomLeftRadius: BORDERRADIUS,
     borderBottomRightRadius: BORDERRADIUS,
+    height: 40,
   },
   playerButton: {
     paddingTop: emSize.EMROUND(1),
     paddingBottom: emSize.EMROUND(1),
     alignItems: 'center',
     borderRadius: BORDERRADIUS,
-    width: 60,
+    width: 40,
   },
   playerButtonUnderlay: {
     underlayColor: THEMES_PLAYER_PRESS,
