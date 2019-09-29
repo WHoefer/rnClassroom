@@ -24,16 +24,21 @@ export default class Bookshelf extends React.Component {
   }
 
 
-componentWillMount() {
+//componentWillMount() {
      //this.data = getBookshelfContent(this.props.resource);
+//}
+
+
+// Ersetzt componentWillReceiveProps
+static getDerivedStateFromProps(props, state){
+  console.log('--->nextProps', JSON.stringify(props.pos));
+  return {pos: props.pos};
 }
 
-
-
-componentWillReceiveProps(nextProps){
-  //console.log('--->nextProps', JSON.stringify(nextProps));
-  this.setState({pos: nextProps.pos});
-}
+//componentWillReceiveProps(nextProps){
+//  console.log('--->nextProps', JSON.stringify(nextProps));
+//  this.setState({pos: nextProps.pos});
+//}
 
 
 

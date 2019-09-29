@@ -21,6 +21,7 @@ export const BACKGROUND = _200;
 export const MENUCOLOR = 'green';
 export const BORDERRADIUS = emSize.EMROUND(1);
 export const TEXTTCOLOR = '#000000';
+export const RADIUS = 20
 
 // Android Color Palette Light green Primary
 const _50 = '#F1F8E9';
@@ -233,6 +234,12 @@ export const styles = {
     borderBottomLeftRadius: BORDERRADIUS,
     borderBottomRightRadius: BORDERRADIUS,
     height: 40,
+    width: WIDTH
+  },
+  playerSpace: {
+    height: 40,
+    width: WIDTH,
+    backgroundColor: BACKGROUND,
   },
   playerButton: {
     paddingTop: emSize.EMROUND(1),
@@ -279,10 +286,11 @@ export const styles = {
     paddingRight: 0,
   },
   playerImage: {
-    width: WIDTH,
     aspectRatio: 4/3,
-    //marginHorizontal :PLR,
+    paddingLeft: PLR,
+    paddingRight: PLR,
     paddingBottom:  emSize.EMROUND(0),
+    backgroundColor: '#dddddd',
   },
 
 

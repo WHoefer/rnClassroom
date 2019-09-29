@@ -5,12 +5,17 @@ import {
   View,
   TouchableHighlight,
   Image,
+  Modal,
+  Alert,
+  StyleSheet
 } from 'react-native';
 import { getAudioPlayerData } from './../FileSystem';
 import Sound from 'react-native-sound';
 import { styles, BACKGROUND, MENUCOLOR, TEXTTCOLOR } from './../GlobalConfig';
 import { emSize } from './../util/EMSize';
-import { FormatedText } from './FormatedText';
+import { FlipBook } from './AudioPlayerComps/FlipBook';
+import { PreView } from './AudioPlayerComps/PreView';
+import { Controls } from './AudioPlayerComps/Controls';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 
@@ -19,6 +24,7 @@ const PAUSE = 2;
 const STOP = 3;
 
 const  PLAY_ICON = "play-arrow";
+const  PLAY_PREVIEW = "play-circle-outline";
 const  PAUSE_ICON = "pause";
 const  STOP_ICON = "stop";
 const  NEXT_ICON = "skip-next";
@@ -34,6 +40,9 @@ export default class AudioPlayer extends React.Component {
         soundArray:[],
         loaded: false,
         play: STOP,
+        modalVisible: false,
+        //playerNumber: this.props.playerNumber,
+        //listOfStopFunctions: this.props.listOfStopFunctions,
         debug: this.props.debug === undefined ? true : this.props.debug,
       };
       this.player = null;
@@ -50,9 +59,21 @@ export default class AudioPlayer extends React.Component {
       this.subType = null;
       this.textArray = [];
       this.imageArray = [];
+      //this.stopAllBinded = this.stopAll.bind(this);
   }
 
-  async componentWillMount() {
+  componentDidMount() {
+    /*if (!this.isPlayerInListOfStopFunctions()) {
+      this.state.listOfStopFunctions.push(
+        {
+          playerNumber: this.state.playerNumber, 
+          stopFunction: this.stopAllBinded()
+        }
+      );
+    }*/
+  }
+
+  async componentDidMount() {
     const soundArray = [];
     const { resource, sequence } = this.state;
     const data = await getAudioPlayerData(resource, sequence);
@@ -66,6 +87,34 @@ export default class AudioPlayer extends React.Component {
     this.loadFirst();
     this.setState({loaded: true});
   }
+
+  setModalVisible(visible) {
+    this.setState({modalVisible: visible});
+  }
+ /* isPlayerInListOfStopFunctions() {
+    let retVal = false;
+    if (this.state.listOfStopFunctions && this.state.listOfStopFunctions.length > 0){
+      for (let i = 0; i < this.state.listOfStopFunctions.length; i++) {
+        const item = this.state.listOfStopFunctions[i];
+        if (item.playerNumber === this.state.playerNumber) {
+          retVal = true;
+        }
+      }
+    }
+    return retVal;
+  }
+
+  stopOtherPlayers() {
+    if (this.state.listOfStopFunctions && this.state.listOfStopFunctions.length > 0){
+      for (let i = 0; i < this.state.listOfStopFunctions.length; i++) {
+        const item = this.state.listOfStopFunctions[i];
+        const stopFunction = item.stopFunction;
+        if (item.playerNumber !== this.state.playerNumber) {
+          stopFunction();
+        }
+      }
+    }
+  }*/
 
   loadFirst(){
     try {
@@ -215,7 +264,7 @@ export default class AudioPlayer extends React.Component {
   }
 
   componentWillUnmount(){
-    this.stopAll();
+    //this.stopAllBinded();
     this.releaseAll();
   }
 
@@ -249,6 +298,7 @@ export default class AudioPlayer extends React.Component {
   }
 
   play(){
+    //this.stopOtherPlayers();
     this.debugPlay();
     this.sound.play((onEnd) => {
       if(onEnd){
@@ -295,12 +345,12 @@ export default class AudioPlayer extends React.Component {
     return;
   }
 
-  renderButton(id, name, onPress){
+  renderButton(id, name, onPress, style){
     return(
       <TouchableHighlight
         key={id+name}
         onPress={ () => { onPress()}}
-        style={styles.playerButton}
+        style={[styles.playerButton, style]}
         underlayColor={styles.playerButtonUnderlay.underlayColor}>
         <Icon name={name} size={styles.playerIcon.size} color={styles.playerIcon.color} />
       </TouchableHighlight>
@@ -327,62 +377,81 @@ export default class AudioPlayer extends React.Component {
    );
  }
 
- renderFlipbook(key, text, image){
-   if(  this.subType != null && this.subType === 'textAndAudio') {
-    return (FormatedText(key, text, styles.playerText, styles.playerTextFormated));
-  } else if(  this.subType != null &&   this.subType === 'imageAndAudio') {
-    return (
-        <Image
-          source={image}
-          resizeMode="contain"
-          style={styles.playerImage}
-          borderBottomLeftRadius={20}
-          borderBottomRightRadius={20}
-          borderTopLeftRadius={emSize.EMROUND(1)}
-          borderTopRightRadius={emSize.EMROUND(1)}
-         />
-    );
-  } else {
-    console.log('---> Keine anzeige');
-    return (<View></View>);
-  }
- }
 
   renderPlayer(){
     const { id } = this.state;
-    const containerStyle = [
-      styles.playerContainer, {
+    let containerStyle = {}
+    Object.assign(containerStyle, styles.playerContainer, {
         flexDirection: 'column',
-        justifyContent: 'flex-start',
-        flex: 1,
+        justifyContent: 'center', 
+        alignItems: 'stretch',
+        flex: 1
       }
-    ];
-    const infoTextStyle = [
-      styles.playerAudioText,
-      {
-        color: TEXTTCOLOR,
-      }
-    ];
-    const buttonContainer = [
-      styles.playerButtonContainer,
+    );
+    let infoTextStyle = {}
+    Object.assign(infoTextStyle, styles.playerAudioText, { color: TEXTTCOLOR });
+    let buttonContainer = {}
+    Object.assign(buttonContainer, styles.playerButtonContainer,
       {
       flexDirection: 'row',
       justifyContent: 'space-around',
       alignItems: 'center',
-      flex: 1
-    }];
+    });
 
     return (
-      <View key={id + 'container'} style={containerStyle}>
-        <View style={{flex: 1}}>
-          {this.renderFlipbook(id + 'Name', this.text, this.image)}
-        </View>
-        <View key={id + 'Buttons'} style={buttonContainer}>
-          {this.renderPlayPause(id)}
-          {this.renderButton(id, PREVIOUS_ICON, () => {this.playbackPrevPos()})}
-          {this.renderButton(id, NEXT_ICON, () => {this.playbackNextPos()})}
-          {this.renderButton(id, STOP_ICON, () => {this.stopAll();})}
-        </View>
+      <View style={{marginTop: 22}}>
+        <Modal
+        style={styles.BACKGROUND}
+        animationType="slide"
+        transparent={false}
+        visible={this.state.modalVisible}
+        onRequestClose={() => {
+          Alert.alert('Modal has been closed.');
+        }}>
+          <View key={id + 'container'} style={containerStyle}>
+            <View >
+              <FlipBook
+                id={id + 'Name'}
+                text={this.text}
+                image={this.image}
+                subType={this.subType}
+              />
+              <View style={styles.playerSpace} ></View>
+            </View>
+            {/* <View key={id + 'Buttons'} style={buttonContainer}>
+              {this.renderPlayPause(id)}
+              {this.renderButton(id, PREVIOUS_ICON, () => {this.playbackPrevPos()})}
+              {this.renderButton(id, NEXT_ICON, () => {this.playbackNextPos()})}
+              {this.renderButton(id, STOP_ICON, () => {this.stopAll();})}
+            </View> */}
+            <Controls 
+              id={id + 'Buttons'}
+              playState={this.state.play}
+              onPressPlay={() => {this.playAll();}}
+              onPressPause={() => {this.pauseAll();}}
+              onResume={() => {this.resume();}}
+              onPressBack={() => {this.playbackPrevPos();}}
+              onPressNext={() => {this.playbackNextPos();}}
+              onPressStop={() => {this.stopAll();}}
+            />
+            <View style={styles.playerSpace} ></View>
+            <TouchableHighlight
+                onPress={() => {
+                  this.setModalVisible(!this.state.modalVisible);
+                }}>
+              <View key={id + 'ButtonZurueck'} style={buttonContainer}>
+                <Text>Player schließen</Text>
+              </View>
+            </TouchableHighlight>
+          </View>
+        </Modal>
+        <PreView 
+          key={id + 'Name'}
+          text={this.text}
+          image={this.image}
+          subType={this.subType}
+          onPress={() => {this.setModalVisible(true);}}
+        />
       </View>
     );
   }

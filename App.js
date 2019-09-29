@@ -10,7 +10,7 @@ import {
   Modal,
   Button,
 } from 'react-native';
-import RNFetchBlob from 'react-native-fetch-blob'
+import RNFetchBlob from 'rn-fetch-blob'
 import {
   getJsonFileContent,
   getJsonFilesContent,

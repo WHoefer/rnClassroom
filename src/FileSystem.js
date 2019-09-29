@@ -1,4 +1,4 @@
-import RNFetchBlob from 'react-native-fetch-blob';
+import RNFetchBlob from 'rn-fetch-blob';
 import {logger, loggerBookshelf} from './util/logging';
 
 export const BOOKSHELF = 0;
