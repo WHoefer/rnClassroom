@@ -16,6 +16,7 @@ import { emSize } from './../util/EMSize';
 import { FlipBook } from './AudioPlayerComps/FlipBook';
 import { PreView } from './AudioPlayerComps/PreView';
 import { Controls } from './AudioPlayerComps/Controls';
+import { Player } from './AudioPlayerComps/Player';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 
@@ -345,29 +346,6 @@ export default class AudioPlayer extends React.Component {
     return;
   }
 
-  renderButton(id, name, onPress, style){
-    return(
-      <TouchableHighlight
-        key={id+name}
-        onPress={ () => { onPress()}}
-        style={[styles.playerButton, style]}
-        underlayColor={styles.playerButtonUnderlay.underlayColor}>
-        <Icon name={name} size={styles.playerIcon.size} color={styles.playerIcon.color} />
-      </TouchableHighlight>
-    );
-  }
-
- renderPlayPause(id){
-   const { play } = this.state;
-   if(play === PAUSE) {
-      return this.renderButton(id, PLAY_ICON, () => {this.resume();})
-   } else if( play === STOP){
-     return this.renderButton(id, PLAY_ICON, () => {this.playAll();})
-   }
-   return this.renderButton(id, PAUSE_ICON, () => {this.pauseAll();})
-
- }
-
  renderImage(key, obj, style){
    const { resource } = this.state;
    return (
@@ -401,14 +379,28 @@ export default class AudioPlayer extends React.Component {
     return (
       <View style={{marginTop: 22}}>
         <Modal
-        style={styles.BACKGROUND}
+        style={{backgroundColor: styles.BACKGROUND}}
         animationType="slide"
         transparent={false}
         visible={this.state.modalVisible}
         onRequestClose={() => {
           Alert.alert('Modal has been closed.');
         }}>
-          <View key={id + 'container'} style={containerStyle}>
+          <Player
+            key={id}
+            text={this.text}
+            image={this.image}
+            subType={this.subType}
+            playState={this.state.play}
+            onPressPlay={() => {this.playAll();}}
+            onPressPause={() => {this.pauseAll();}}
+            onResume={() => {this.resume();}}
+            onPressBack={() => {this.playbackPrevPos();}}
+            onPressNext={() => {this.playbackNextPos();}}
+            onPressStop={() => {this.stopAll();}}
+            onPressClose={() => {this.setModalVisible(!this.state.modalVisible);}}
+          />
+          {/* <View key={id + 'container'} style={containerStyle}>
             <View >
               <FlipBook
                 id={id + 'Name'}
@@ -418,12 +410,6 @@ export default class AudioPlayer extends React.Component {
               />
               <View style={styles.playerSpace} ></View>
             </View>
-            {/* <View key={id + 'Buttons'} style={buttonContainer}>
-              {this.renderPlayPause(id)}
-              {this.renderButton(id, PREVIOUS_ICON, () => {this.playbackPrevPos()})}
-              {this.renderButton(id, NEXT_ICON, () => {this.playbackNextPos()})}
-              {this.renderButton(id, STOP_ICON, () => {this.stopAll();})}
-            </View> */}
             <Controls 
               id={id + 'Buttons'}
               playState={this.state.play}
@@ -443,7 +429,7 @@ export default class AudioPlayer extends React.Component {
                 <Text>Player schließen</Text>
               </View>
             </TouchableHighlight>
-          </View>
+          </View> */}
         </Modal>
         <PreView 
           key={id + 'Name'}
