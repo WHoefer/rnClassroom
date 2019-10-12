@@ -1,6 +1,16 @@
 import React from 'react';
 import { View, TouchableHighlight } from 'react-native';
-import { styles } from './../../GlobalConfig';
+import { 
+  styles, 
+  RADIUS, 
+  HEIGHT_PLAYER_CONTROL, 
+  WIDTH_PLAYER_CONTROL, 
+  THEMES_PLAYER_CONTROLS_BACKGROUND,
+  SIZE_PLAYER_ICON,
+  THEMES_PLAYER_BUTTON,
+  THEMES_PLAYER_PRESS,
+  BORDERRADIUS
+} from './../../GlobalConfig';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 
@@ -16,14 +26,29 @@ const PAUSE = 2;
 const STOP = 3;
 
 
-const renderButton = (id, name, onPress, style) => {
+const renderButton = (id, name, onPress) => {
+   const style = {
+    //paddingTop: emSize.EMROUND(1),
+    //paddingBottom: emSize.EMROUND(1),
+    alignItems: 'center',
+    borderRadius: BORDERRADIUS,
+    width: HEIGHT_PLAYER_CONTROL,
+    height: HEIGHT_PLAYER_CONTROL
+
+   }
+
     return(
       <TouchableHighlight
         key={id+name}
         onPress={ () => { onPress()}}
-        style={[styles.playerButton, style]}
-        underlayColor={styles.playerButtonUnderlay.underlayColor}>
-        <Icon name={name} size={styles.playerIcon.size} color={styles.playerIcon.color} />
+        style={style}
+        underlayColor={THEMES_PLAYER_PRESS}
+      >
+        <Icon 
+          name={name} 
+          size={SIZE_PLAYER_ICON} 
+          color={THEMES_PLAYER_BUTTON} 
+        />
       </TouchableHighlight>
     );
   }
@@ -40,13 +65,17 @@ const renderPlayPause = (id, onPressPlay, onPressPause, onResume, playState ) =>
 
   export const Controls =  (props) => {
 
-    let buttonContainer = {}
-    Object.assign(buttonContainer, styles.playerButtonContainer,
-      {
+    const buttonContainer = {
       flexDirection: 'row',
       justifyContent: 'space-around',
       alignItems: 'center',
-    });
+      borderRadius: RADIUS,
+      backgroundColor: THEMES_PLAYER_CONTROLS_BACKGROUND,
+      borderBottomLeftRadius: RADIUS,
+      borderBottomRightRadius: RADIUS,
+      height: HEIGHT_PLAYER_CONTROL,
+      width: WIDTH_PLAYER_CONTROL
+    };
 
     return(
         <View key={props.id + 'Buttons'} style={buttonContainer}>

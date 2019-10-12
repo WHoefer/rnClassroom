@@ -21,7 +21,9 @@ export const BACKGROUND = _200;
 export const MENUCOLOR = 'green';
 export const BORDERRADIUS = emSize.EMROUND(1);
 export const TEXTTCOLOR = '#000000';
-export const RADIUS = 20
+export const RADIUS = emSize.EMROUND(1);
+export const VERTICAL_MARGINS = emSize.EMROUND(1); // preview Player
+export const ASPECT_RATIO_IMAGE = 4.0/3.0
 
 // Android Color Palette Light green Primary
 const _50 = '#F1F8E9';
@@ -39,6 +41,7 @@ const A200 = '#B2FF59';
 const A400 = '#76FF03';
 const A700 = '#64DD17';
 const BLACK = '#000000';
+const GRAY = '#555555';
 const WHITE = '#FFFFFF';
 
 // Android Color Palette Orange Secondary
@@ -58,21 +61,30 @@ const sA400 = '#FFEA00';
 const sA700 = '#FFD600';
 
 
+export const SIZE_PREVIEW_PLAYER_ICON = 120;
+export const SIZE_PLAYER_ICON = 35;
+export const WIDTH_PLAYER_CONTROL = WIDTH;
+export const HEIGHT_PLAYER_CONTROL = 40;
+export const HEIGHT_PLAYER_SPACE = 40;
 
 
-
-
-export const THEMES_PLAYER_PRESS = A700;
-export const THEMES_PLAYER_BUTTON = BLACK;
-export const THEMES_PLAYER_BACKGROUND = _800;
-export const THEMES_PLAYER_BORDER = _900;
-export const THEMES_MENUE_BACKGROUND = _900;
-export const THEMES_MENUE_COLOR =WHITE;
-export const THEMES_PAGE_BACKGROUND = _50;
+// Background colors
+export const THEMES_PAGE_BACKGROUND = _100;
 export const THEMES_LIST_BACKGROUND = _100;
-export const THEMES_LIST_BORDERCOLOR = _300;
+export const THEMES_MENUE_BACKGROUND = _900;
+export const THEMES_PLAYER_CONTROLS_BACKGROUND = _800;
+export const THEMES_PLAYER_BACKGROUND = _300;
+// Text colors
+export const THEMES_MENUE_COLOR =WHITE;
 export const THEMES_LIST_MAIN_COLOR = BLACK;
 export const THEMES_LIST_SUB_COLOR = _900;
+// Button colors
+export const THEMES_PREVIEW_PLAYER_ICON = sA700;
+export const THEMES_PLAYER_PRESS = A700;
+export const THEMES_PLAYER_BUTTON = BLACK;
+export const THEMES_PLAYER_BUTTON_NA = WHITE;
+// Extra colors
+export const THEMES_LIST_BORDERCOLOR = _300;
 export const THEMES_STATUSBAR_BACKGROUND = _800;
 
 export const styles = {
@@ -126,7 +138,7 @@ export const styles = {
     backgroundColor: THEMES_PAGE_BACKGROUND,
   },
   pageText: {
-    fontSize: emSize.EM(1.2),
+    fontSize: emSize.EM(1.3),
     fontStyle: 'normal',
     fontWeight: 'normal',
     //fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue' : 'normal',
@@ -217,25 +229,6 @@ export const styles = {
     marginHorizontal :PLR,
     paddingBottom:  emSize.EMROUND(0),
   },
-  playerContainer: {
-    marginTop: emSize.EMROUND(1.0),
-    marginBottom:  emSize.EMROUND(1.0),
-    marginHorizontal :PLR,
-    borderWidth: 0,
-    borderRadius: BORDERRADIUS,
-    backgroundColor: BACKGROUND,
-
-  },
-  playerButtonContainer: {
-    borderWidth: 1,
-    borderRadius: BORDERRADIUS,
-    borderColor:THEMES_PLAYER_BORDER,
-    backgroundColor: THEMES_PLAYER_BACKGROUND,
-    borderBottomLeftRadius: BORDERRADIUS,
-    borderBottomRightRadius: BORDERRADIUS,
-    height: 40,
-    width: WIDTH
-  },
   playerSpace: {
     height: 40,
     width: WIDTH,
@@ -248,9 +241,6 @@ export const styles = {
     borderRadius: BORDERRADIUS,
     width: 40,
   },
-  playerButtonUnderlay: {
-    underlayColor: THEMES_PLAYER_PRESS,
-  },
   playerIcon: {
     color: THEMES_PLAYER_BUTTON,
     size: 30,
@@ -262,19 +252,19 @@ export const styles = {
     color: '#FFFFFF',
     textAlign: 'center',
   },
-  playerText: {
-    fontSize: emSize.EM(1.2),
+  flipBookText: {
+    fontSize: emSize.EM(1.4),
     fontStyle: 'normal',
     fontWeight: 'normal',
     //fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue' : 'normal',
     color: '#000000',
-    paddingTop: 0,
+    paddingTop: 10,
     paddingBottom: 10,
     paddingLeft: 0,
     paddingRight: 0,
   },
-  playerTextFormated: {
-    fontSize: emSize.EM(1.1),
+  flipBookTextFormated: {
+    fontSize: emSize.EM(1.4),
     fontStyle: 'normal',
     fontWeight: 'bold',
     //fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue' : 'normal',
@@ -285,13 +275,5 @@ export const styles = {
     paddingLeft:0,
     paddingRight: 0,
   },
-  playerImage: {
-    aspectRatio: 4/3,
-    paddingLeft: PLR,
-    paddingRight: PLR,
-    paddingBottom:  emSize.EMROUND(0),
-    backgroundColor: '#dddddd',
-  },
-
 
 };

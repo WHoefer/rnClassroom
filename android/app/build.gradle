@@ -143,6 +143,14 @@ android {
         }
     }
     signingConfigs {
+        release {
+            if (project.hasProperty('YogaBase_UPLOAD_STORE_FILE')) {
+                storeFile file(YogaBase_UPLOAD_STORE_FILE)
+                storePassword YogaBase_UPLOAD_STORE_PASSWORD
+                keyAlias YogaBase_UPLOAD_KEY_ALIAS
+                keyPassword YogaBase_UPLOAD_KEY_PASSWORD
+            }
+        }
         debug {
             storeFile file('debug.keystore')
             storePassword 'android'

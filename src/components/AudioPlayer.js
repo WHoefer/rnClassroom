@@ -11,13 +11,8 @@ import {
 } from 'react-native';
 import { getAudioPlayerData } from './../FileSystem';
 import Sound from 'react-native-sound';
-import { styles, BACKGROUND, MENUCOLOR, TEXTTCOLOR } from './../GlobalConfig';
 import { emSize } from './../util/EMSize';
-import { FlipBook } from './AudioPlayerComps/FlipBook';
-import { PreView } from './AudioPlayerComps/PreView';
-import { Controls } from './AudioPlayerComps/Controls';
-import { Player } from './AudioPlayerComps/Player';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { ModalPlayer } from './AudioPlayerComps/ModalPlayer';
 
 
 const PLAY = 1;
@@ -92,31 +87,7 @@ export default class AudioPlayer extends React.Component {
   setModalVisible(visible) {
     this.setState({modalVisible: visible});
   }
- /* isPlayerInListOfStopFunctions() {
-    let retVal = false;
-    if (this.state.listOfStopFunctions && this.state.listOfStopFunctions.length > 0){
-      for (let i = 0; i < this.state.listOfStopFunctions.length; i++) {
-        const item = this.state.listOfStopFunctions[i];
-        if (item.playerNumber === this.state.playerNumber) {
-          retVal = true;
-        }
-      }
-    }
-    return retVal;
-  }
-
-  stopOtherPlayers() {
-    if (this.state.listOfStopFunctions && this.state.listOfStopFunctions.length > 0){
-      for (let i = 0; i < this.state.listOfStopFunctions.length; i++) {
-        const item = this.state.listOfStopFunctions[i];
-        const stopFunction = item.stopFunction;
-        if (item.playerNumber !== this.state.playerNumber) {
-          stopFunction();
-        }
-      }
-    }
-  }*/
-
+ 
   loadFirst(){
     try {
       this.releaseAll();
@@ -299,7 +270,6 @@ export default class AudioPlayer extends React.Component {
   }
 
   play(){
-    //this.stopOtherPlayers();
     this.debugPlay();
     this.sound.play((onEnd) => {
       if(onEnd){
@@ -356,110 +326,37 @@ export default class AudioPlayer extends React.Component {
  }
 
 
-  renderPlayer(){
+  render(){
     const { id } = this.state;
-    let containerStyle = {}
-    Object.assign(containerStyle, styles.playerContainer, {
-        flexDirection: 'column',
-        justifyContent: 'center', 
-        alignItems: 'stretch',
-        flex: 1
-      }
-    );
-    let infoTextStyle = {}
-    Object.assign(infoTextStyle, styles.playerAudioText, { color: TEXTTCOLOR });
-    let buttonContainer = {}
-    Object.assign(buttonContainer, styles.playerButtonContainer,
-      {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      alignItems: 'center',
-    });
 
     return (
-      <View style={{marginTop: 22}}>
-        <Modal
-        style={{backgroundColor: styles.BACKGROUND}}
-        animationType="slide"
-        transparent={false}
-        visible={this.state.modalVisible}
-        onRequestClose={() => {
-          Alert.alert('Modal has been closed.');
-        }}>
-          <Player
-            key={id}
-            text={this.text}
-            image={this.image}
-            subType={this.subType}
-            playState={this.state.play}
-            onPressPlay={() => {this.playAll();}}
-            onPressPause={() => {this.pauseAll();}}
-            onResume={() => {this.resume();}}
-            onPressBack={() => {this.playbackPrevPos();}}
-            onPressNext={() => {this.playbackNextPos();}}
-            onPressStop={() => {this.stopAll();}}
-            onPressClose={() => {this.setModalVisible(!this.state.modalVisible);}}
-          />
-          {/* <View key={id + 'container'} style={containerStyle}>
-            <View >
-              <FlipBook
-                id={id + 'Name'}
-                text={this.text}
-                image={this.image}
-                subType={this.subType}
-              />
-              <View style={styles.playerSpace} ></View>
-            </View>
-            <Controls 
-              id={id + 'Buttons'}
-              playState={this.state.play}
-              onPressPlay={() => {this.playAll();}}
-              onPressPause={() => {this.pauseAll();}}
-              onResume={() => {this.resume();}}
-              onPressBack={() => {this.playbackPrevPos();}}
-              onPressNext={() => {this.playbackNextPos();}}
-              onPressStop={() => {this.stopAll();}}
-            />
-            <View style={styles.playerSpace} ></View>
-            <TouchableHighlight
-                onPress={() => {
-                  this.setModalVisible(!this.state.modalVisible);
-                }}>
-              <View key={id + 'ButtonZurueck'} style={buttonContainer}>
-                <Text>Player schließen</Text>
-              </View>
-            </TouchableHighlight>
-          </View> */}
-        </Modal>
-        <PreView 
-          key={id + 'Name'}
-          text={this.text}
-          image={this.image}
-          subType={this.subType}
-          onPress={() => {this.setModalVisible(true);}}
-        />
-      </View>
+      <ModalPlayer
+        loaded={this.state.loaded}
+        modalVisible={this.state.modalVisible}
+        onPressClose={ () => {
+          this.stopAll();
+          this.setModalVisible(false);
+        }}
+        onPressDownload={ () => {console.log('PressDownload')}}
+        key={id}
+        text={this.text}
+        image={this.image}
+        subType={this.subType}
+        playState={this.state.play}
+        onPressPlay={() => {this.playAll();}}
+        onPressPause={() => {this.pauseAll();}}
+        onResume={() => {this.resume();}}
+        onPressBack={() => {this.playbackPrevPos();}}
+        onPressNext={() => {this.playbackNextPos();}}
+        onPressStop={() => {this.stopAll();}}
+        onPress={() => {
+          console.log('onPress');
+          this.setModalVisible(true);}}
+      />
     );
   }
 
-
-  renderInfo(){
-    const { id } = this.state;
-    return (
-      <Text key={id + 'warten'}>
-        {"Bitte warten..."}
-      </Text>
-    );
-  }
-   render() {
-    const { loaded } = this.state;
-
-    if(loaded){
-      return(this.renderPlayer());
-    }
-    return(this.renderInfo());
-   }
-
+  
   debugPlay(){
     try {
       if (this.state.debug) {

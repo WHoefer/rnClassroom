@@ -59,7 +59,14 @@ export default class Page extends React.Component {
   }
 
  renderText(key, obj, style, styleFormat){
-   return (FormatedText(key, obj.content, style, styleFormat));
+  return (
+    <FormatedText
+      key={key} 
+      text={obj.content}
+      style={style}
+      styleFormat={styleFormat}
+    />
+  );
  }
 
  renderVideo(key, obj, style){

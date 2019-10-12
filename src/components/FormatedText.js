@@ -7,25 +7,13 @@ import {
   Image,
 } from 'react-native';
 
-/*export const FormatedText = (key, text) => {
-  const ft = <Text style={{color: 'red'}} >{text}</Text>
-  const t = ['Hallo', ft, 'Hallo']
-  return (
-    <View key={key+'formatedText'}>
-     <Text >
-       {t}
-     </Text>
-    </View>
-  );
-}*/
 
-
-export const FormatedText= (key, text, style, styleFormat) => {
-  const str = text;
-  const boldPatt = "</B>";
-  const italicPatt = "</I>";
-  const underlinePatt = "</U>";
-  const formatPatt = "</F>";
+export const FormatedText= (props) => {
+  const str = props.text;
+  const BOLD_PATT = "</B>";
+  const ITALIC_PATT = "</I>";
+  const UNDERLINE_PATT = "</U>";
+  const FORMAT_PATT = "</F>";
   const patt1 = /<B>.+?<\/B>|<I>.+?<\/I>|<U>.+?<\/U>|<F>.+?<\/F>/g;
 
   let a = [];
@@ -42,7 +30,7 @@ export const FormatedText= (key, text, style, styleFormat) => {
 
   while ((res =patt1.exec(str)) != null) {
     keyCount++;
-    textKey = key + keyCount;
+    textKey = props.id + keyCount;
     endPos = patt1.lastIndex;
     l= res[0].length;
     workStr = str.substring(startPos,endPos-l);
@@ -54,17 +42,17 @@ export const FormatedText= (key, text, style, styleFormat) => {
     //console.log('RES: ', res);
     out = res[0];
     out = out.substring(3, out.length-4);
-    if(boldPatt === pattern){
+    if(BOLD_PATT === pattern){
       formatStr = <Text key={textKey} style={{fontWeight: 'bold'}} >{out}</Text>
     }
-    if(italicPatt === pattern){
+    if(ITALIC_PATT === pattern){
       formatStr = <Text key={textKey} style={{fontStyle: 'italic'}} >{out}</Text>
     }
-    if(underlinePatt === pattern){
+    if(UNDERLINE_PATT === pattern){
       formatStr = <Text key={textKey} style={{textDecorationLine: 'underline'}} >{out}</Text>
     }
-    if(formatPatt === pattern){
-      formatStr = <Text key={textKey} style={styleFormat} >{out}</Text>
+    if(FORMAT_PATT === pattern){
+      formatStr = <Text key={textKey} style={props.styleFormat} >{out}</Text>
     }
     a.push(formatStr);
   }
@@ -74,8 +62,8 @@ export const FormatedText= (key, text, style, styleFormat) => {
   }
 //console.log(a);
   return (
-    <View key={key+'formatedText'}>
-     <Text style={style}>
+    <View key={props.id+'formatedText'}>
+     <Text style={props.style}>
        {a}
      </Text>
     </View>

@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, TouchableHighlight, Text } from 'react-native';
-import { styles } from './../../GlobalConfig';
+import { View } from 'react-native';
+import { PLR, THEMES_PLAYER_BACKGROUND, WIDTH, HEIGHT_PLAYER_SPACE } from './../../GlobalConfig';
 import { FlipBook } from './FlipBook';
 import { Controls } from './Controls';
 
@@ -9,51 +9,41 @@ import { Controls } from './Controls';
 
 export const Player =  (props) => {
 
-    let containerStyle = {}
-    Object.assign(containerStyle, styles.playerContainer, {
+    let containerStyle = {
         flexDirection: 'column',
         justifyContent: 'center', 
         alignItems: 'stretch',
-        flex: 1
-      }
-    );
+        flex: 1,
+        backgroundColor: THEMES_PLAYER_BACKGROUND,
+      };
 
-    let buttonContainer = {}
-    Object.assign(buttonContainer, styles.playerButtonContainer,
-      {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      alignItems: 'center',
-    });
-
+    const space = {
+      height: HEIGHT_PLAYER_SPACE,
+      width: WIDTH,
+      backgroundColor: THEMES_PLAYER_BACKGROUND,
+    }  
+    
     return(
-        <View key={props.id + 'container'} style={containerStyle}>
-        <View >
+      <View key={props.id + 'container'} style={containerStyle}>
+        <View style={{marginHorizontal: PLR}}>
           <FlipBook
             id={props.id + 'Name'}
             text={props.text}
             image={props.image}
             subType={props.subType}
           />
-          <View style={styles.playerSpace} ></View>
+          <View style={space} ></View>
+          <Controls 
+            id={props.id + 'Buttons'}
+            playState={props.playState}
+            onPressPlay={props.onPressPlay}
+            onPressPause={props.onPressPause}
+            onResume={props.onResume}
+            onPressBack={props.onPressBack}
+            onPressNext={props.onPressNext}
+            onPressStop={props.onPressStop}
+          />
         </View>
-        <Controls 
-          id={props.id + 'Buttons'}
-          playState={props.playState}
-          onPressPlay={props.onPressPlay}
-          onPressPause={props.onPressPause}
-          onResume={props.onResume}
-          onPressBack={props.onPressBack}
-          onPressNext={props.onPressNext}
-          onPressStop={props.onPressStop}
-        />
-        <View style={styles.playerSpace} ></View>
-        <TouchableHighlight onPress={props.onPressClose}>
-          <View key={props.id + 'ButtonZurueck'} style={buttonContainer}>
-            <Text>Player schließen</Text>
-          </View>
-        </TouchableHighlight>
       </View>
-
     );
 }
